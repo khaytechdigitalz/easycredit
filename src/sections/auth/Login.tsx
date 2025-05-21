@@ -31,15 +31,16 @@ export default function Login() {
           </Link>
         </Stack>
         */}
-
+       {/*
         <Tooltip title={method} placement="left">
           <Box
             component="img"
             alt={method}
-            /* src={`/logo/logo.png`} */ 
+             src={`/logo/logo.png`} 
             sx={{ width: 102, height: 32, position: 'absolute', right: 0 }}
           />
         </Tooltip>
+        */}
       </Stack>
 
       {/*

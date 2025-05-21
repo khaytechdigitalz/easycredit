@@ -14,7 +14,7 @@ module.exports = withTM({
   trailingSlash: true,
   env: {
     // HOST
-    HOST_API_KEY: 'http://localhost/minimal_web/api',
+    HOST_API_KEY: 'https://payton.khaytech.com/api',
     // MAPBOX
     MAPBOX_API: '',
     // FIREBASE

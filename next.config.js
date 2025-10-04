@@ -14,7 +14,8 @@ module.exports = withTM({
   trailingSlash: true,
   env: {
     // HOST
-    HOST_API_KEY: 'https://payton.khaytech.com/api',
+    // HOST_API_KEY: 'https://payton.khaytech.com/api',
+    HOST_API_KEY: 'https://eazy-credit-api.dev.5starcompany.com.ng',
     // MAPBOX
     MAPBOX_API: '',
     // FIREBASE

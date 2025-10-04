@@ -99,10 +99,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (accessToken) {
         setSession(accessToken);
 
-        const response = await axios.get('/user-info');
+        const response = await axios.get('/admin-dashboard/d/stats');
 
-        const { user } = response.data.data.user;
-        // alert(response.data.data.user.id);
+        const { user } = response.data.loanDisbursed;
 
         dispatch({
           type: Types.INITIAL,
@@ -137,10 +136,12 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, [initialize]);
 
   // LOGIN
+  const strategy = 'local';
   const login = useCallback(async (email: string, password: string) => {
-    const response = await axios.post('/login', {
+    const response = await axios.post('/authentication', {
       email,
       password,
+      strategy,
     });
     // const { accessToken, user } = response.data;
     
@@ -148,14 +149,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const resp = JSON.stringify(response);
     const responsex = JSON.parse(resp);
     console.info(typeof responsex);
-    if (!responsex.data.data) {
+    console.info(responsex);
+    if (!responsex.data.accessToken) {
       throw new Error(`Invalid login credentials`);
     }
-    const { accessToken, user } = responsex.data.data;
-    // console.info(accessToken);
-    // const accessToken = response.data.data.access_token;
+    const { user } = responsex.data;
 
-    setSession(response.data.data.access_token);
+    setSession(response.data.accessToken);
 
     dispatch({
       type: Types.LOGIN,

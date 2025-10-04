@@ -13,7 +13,7 @@ interface Props extends CardProps {
 }
 
 export default function AppWidgetSummary({ title , total, sx, ...other }: Props) {
- 
+
   return (
     <Card sx={{ display: 'flex', alignItems: 'center', p: 3, ...sx }} {...other}>
       <Box sx={{ flexGrow: 1 }}>

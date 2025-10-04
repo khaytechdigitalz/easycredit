@@ -18,7 +18,7 @@ import {
 import { SelectChangeEvent } from '@mui/material/Select';
 // redux
 import { useDispatch, useSelector } from '../../../redux/store';
-import { getProducts } from '../../../redux/slices/product';
+import { getProducts } from '../../../redux/slices/endpoints';
 // routes
 import { PATH_DASHBOARD } from '../../../routes/paths';
 // @types

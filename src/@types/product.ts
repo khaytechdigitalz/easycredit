@@ -12,11 +12,16 @@ export type IProductReview = {
 };
 
 export type IProduct = {
+  _id: string;
   id: string;
   cover: string;
   images: string[];
   name: string;
   price: number;
+  amount: number;
+  userId: string;
+  purpose: string;
+  interestRate: number;
   code: string;
   sku: string;
   tags: string[];
@@ -36,7 +41,9 @@ export type IProduct = {
   available: number;
   description: string;
   sold: number;
+  term:  string | number;
   createdAt: Date | string | number;
+  applicationDate:  string ;
   category: string;
   gender: string;
 };

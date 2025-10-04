@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import NextLink from 'next/link';
 import { useRouter } from 'next/router';
+
 // @mui
 import {
   Card,
@@ -17,6 +18,7 @@ import {
 } from '@mui/material';
 import { SelectChangeEvent } from '@mui/material/Select';
 // redux
+import axios from '../../../utils/axios';
 import { useDispatch, useSelector } from '../../../redux/store';
 import { getProducts } from '../../../redux/slices/product';
 // routes
@@ -43,16 +45,17 @@ import Scrollbar from '../../../components/scrollbar';
 import CustomBreadcrumbs from '../../../components/custom-breadcrumbs';
 import ConfirmDialog from '../../../components/confirm-dialog';
 // sections
-import { ProductTableRow, ProductTableToolbar } from '../../../sections/@dashboard/e-commerce/list';
+import { ProductTableRow, ProductTableToolbar } from '../../../sections/@dashboard/loans/list';
 
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
   { id: 'name', label: 'ID', align: 'left' },
-  { id: 'name', label: 'Branch', align: 'left' },
-  { id: 'name', label: 'Client', align: 'left' },
-  { id: 'name', label: 'Product', align: 'left' },
+  { id: 'name', label: 'User ID', align: 'left' },
   { id: 'name', label: 'Amount', align: 'left' },
+  { id: 'name', label: 'Term', align: 'left' },
+  { id: 'name', label: 'Purpose', align: 'left' },
+  { id: 'name', label: 'Interest Rate', align: 'left' },
   { id: 'name', label: 'Status', align: 'left' },
   { id: 'name', label: 'Date', align: 'left' }, 
   { id: '' },
@@ -110,15 +113,38 @@ export default function EcommerceProductListPage() {
 
   const [openConfirm, setOpenConfirm] = useState(false);
 
+
+  const [loanlog, setDashlog] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        const accessToken = localStorage.getItem('accessToken');
+        const config = {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`
+          }
+        }; 
+
+        const loansResponse = await axios.get('/admin-dashboard/d/recent-loans', config);
+        setDashlog(loansResponse.data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
+
   useEffect(() => {
     dispatch(getProducts());
   }, [dispatch]);
 
   useEffect(() => {
-    if (products.length) {
-      setTableData(products);
+    if (loanlog?.length) {
+      setTableData(loanlog);
     }
-  }, [products]);
+  }, [loanlog]);
 
   const dataFiltered = applyFilter({
     inputData: tableData,
@@ -271,11 +297,11 @@ export default function EcommerceProductListPage() {
                     .map((row, index) =>
                       row ? (
                         <ProductTableRow
-                          key={row.id}
+                          key={row._id}
                           row={row}
-                          selected={selected.includes(row.id)}
-                          onSelectRow={() => onSelectRow(row.id)}
-                          onDeleteRow={() => handleDeleteRow(row.id)}
+                          selected={selected.includes(row._id)}
+                          onSelectRow={() => onSelectRow(row._id)}
+                          onDeleteRow={() => handleDeleteRow(row._id)}
                           onEditRow={() => handleEditRow(row.name)}
                           onViewRow={() => handleViewRow(row.name)}
                         />

@@ -52,6 +52,38 @@ const navConfig = [
     subheader: 'management',
     items: [
 
+
+      // LOAN
+      {
+        title: 'Loans',
+        path: PATH_DASHBOARD.loan.product,
+        icon: ICONS.gift,
+        children: [
+ 
+          { title: 'Manage Loans ', path: PATH_DASHBOARD.loan.applications },
+          { title: 'Loans Products', path: PATH_DASHBOARD.loan.product },
+          { title: 'View Loans', path: PATH_DASHBOARD.loan.loans },
+          { title: 'Create Loans', path: PATH_DASHBOARD.loan.create_new_loan },
+          { title: 'Loan Repayment', path: PATH_DASHBOARD.loan.repayments },
+          { title: 'Manage Charges', path: PATH_DASHBOARD.loan.charges },
+          { title: 'Loan Calculator', path: PATH_DASHBOARD.loan.calculator },
+          { title: 'Manage Cash Register', path: PATH_DASHBOARD.loan.register },
+          { title: 'Loan Provision', path: PATH_DASHBOARD.loan.provision },
+           
+        ],
+      },
+      
+
+      // USER
+      {
+        title: 'Client',
+        path: PATH_DASHBOARD.client.list,
+        icon: ICONS.user,
+        children: [ 
+          { title: 'list', path: PATH_DASHBOARD.client.list },
+          { title: 'create', path: PATH_DASHBOARD.client.create },
+        ],
+      },
       // INVOICE
       {
         title: 'Accouting',
@@ -75,17 +107,6 @@ const navConfig = [
       },
  
 
-      // USER
-      {
-        title: 'Client',
-        path: PATH_DASHBOARD.client.list,
-        icon: ICONS.user,
-        children: [ 
-          { title: 'list', path: PATH_DASHBOARD.client.list },
-          { title: 'create', path: PATH_DASHBOARD.client.create },
-        ],
-      },
-
      
       // COMMUNICATION
       {
@@ -102,25 +123,6 @@ const navConfig = [
         ],
       },
 
-      // LOAN
-      {
-        title: 'Loans',
-        path: PATH_DASHBOARD.loan.product,
-        icon: ICONS.gift,
-        children: [
- 
-          { title: 'Manage Products', path: PATH_DASHBOARD.loan.product },
-          { title: 'View Loans', path: PATH_DASHBOARD.loan.loans },
-          { title: 'View Applications', path: PATH_DASHBOARD.loan.applications },
-          { title: 'Create Loans', path: PATH_DASHBOARD.loan.create_new_loan },
-          { title: 'Loan Repayment', path: PATH_DASHBOARD.loan.repayments },
-          { title: 'Manage Charges', path: PATH_DASHBOARD.loan.charges },
-          { title: 'Loan Calculator', path: PATH_DASHBOARD.loan.calculator },
-          { title: 'Manage Cash Register', path: PATH_DASHBOARD.loan.register },
-          { title: 'Loan Provision', path: PATH_DASHBOARD.loan.provision },
-           
-        ],
-      },
 
 
       // INCOME

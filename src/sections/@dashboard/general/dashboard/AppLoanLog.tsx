@@ -28,9 +28,9 @@ import { TableHeadCustom } from '../../../../components/table';
 // ----------------------------------------------------------------------
 
 type RowProps = {
-  id: string;
-  category: string;
-  price: number;
+  _id: string;
+  purpose: string;
+  amount: number;
   status: string;
 };
 
@@ -56,10 +56,9 @@ export default function AppLoanLog({
         <Scrollbar>
           <Table sx={{ minWidth: 720 }}>
             <TableHeadCustom headLabel={tableLabels} />
-
             <TableBody>
               {tableData.map((row) => (
-                <AppNewInvoiceRow key={row.id} row={row} />
+                <AppNewInvoiceRow key={row._id} row={row} />
               ))}
             </TableBody>
           </Table>
@@ -100,40 +99,31 @@ function AppNewInvoiceRow({ row }: AppNewInvoiceRowProps) {
 
   const handleDownload = () => {
     handleClosePopover();
-    console.log('DOWNLOAD', row.id);
+    console.log('DETAILS', row._id);
   };
-
-  const handlePrint = () => {
-    handleClosePopover();
-    console.log('PRINT', row.id);
-  };
-
-  const handleShare = () => {
-    handleClosePopover();
-    console.log('SHARE', row.id);
-  };
+ 
 
   const handleDelete = () => {
     handleClosePopover();
-    console.log('DELETE', row.id);
+    console.log('DELETE', row._id);
   };
 
   return (
     <>
       <TableRow>
-        <TableCell>{`INV-${row.id}`}</TableCell>
+        <TableCell>{`${row._id}`}</TableCell>
 
-        <TableCell>{row.category}</TableCell>
+        <TableCell>{row.purpose}</TableCell>
 
-        <TableCell>{fCurrency(row.price)}</TableCell>
+        <TableCell>{fCurrency(row.amount)}</TableCell>
 
         <TableCell>
           <Label
             variant="soft"
             color={
-              (row.status === 'in_progress' && 'warning') ||
-              (row.status === 'out_of_date' && 'error') ||
-              'success'
+              (row.status === 'paid' && 'success') ||
+              (row.status === 'pending' && 'warning') ||
+              'error'
             }
           >
             {sentenceCase(row.status)}
@@ -157,17 +147,7 @@ function AppNewInvoiceRow({ row }: AppNewInvoiceRowProps) {
           <Iconify icon="eva:download-fill" />
           Download
         </MenuItem>
-
-        <MenuItem onClick={handlePrint}>
-          <Iconify icon="eva:printer-fill" />
-          Print
-        </MenuItem>
-
-        <MenuItem onClick={handleShare}>
-          <Iconify icon="eva:share-fill" />
-          Share
-        </MenuItem>
-
+ 
         <Divider sx={{ borderStyle: 'dashed' }} />
 
         <MenuItem onClick={handleDelete} sx={{ color: 'error.main' }}>

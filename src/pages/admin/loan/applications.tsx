@@ -62,9 +62,8 @@ const TABLE_HEAD = [
 ];
 
 const STATUS_OPTIONS = [
-  { value: 'in_stock', label: 'In stock' },
-  { value: 'low_stock', label: 'Low stock' },
-  { value: 'out_of_stock', label: 'Out of stock' },
+  { value: 'paid', label: 'Paid' },
+  { value: 'pending', label: 'Pending' },
 ];
 
 // ----------------------------------------------------------------------
@@ -103,7 +102,7 @@ export default function EcommerceProductListPage() {
 
   const dispatch = useDispatch();
 
-  const { products, isLoading } = useSelector((state) => state.product);
+  const { isLoading } = useSelector((state) => state.product);
 
   const [tableData, setTableData] = useState<IProduct[]>([]);
 
@@ -286,7 +285,7 @@ export default function EcommerceProductListPage() {
                   onSelectAllRows={(checked) =>
                     onSelectAllRows(
                       checked,
-                      tableData.map((row) => row.id)
+                      tableData.map((row) => row._id)
                     )
                   }
                 />
@@ -385,7 +384,7 @@ function applyFilter({
 
   if (filterName) {
     inputData = inputData.filter(
-      (product) => product.name.toLowerCase().indexOf(filterName.toLowerCase()) !== -1
+      (product) => product.userId.toLowerCase().indexOf(filterName.toLowerCase()) !== -1
     );
   }
 

@@ -31,15 +31,15 @@ export default function NavAccount() {
   return (
     <Link component={NextLink} href={PATH_DASHBOARD.user.account} underline="none" color="inherit">
       <StyledRoot>
-        <CustomAvatar src={user?.photoURL} alt={user?.displayName} name={user?.displayName} />
+        <CustomAvatar src='https://placehold.co/600x400/EEE/31343C?font=oswald&text=Admin' alt='Admin' name='Admin' />
 
         <Box sx={{ ml: 2, minWidth: 0 }}>
           <Typography variant="subtitle2" noWrap>
-            {user?.displayName}
+            Admin
           </Typography>
 
           <Typography variant="body2" noWrap sx={{ color: 'text.secondary' }}>
-            {user?.role}
+            Super Admin
           </Typography>
         </Box>
       </StyledRoot>

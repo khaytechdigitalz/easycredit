@@ -78,7 +78,7 @@ export default function ProductTableRow({
         </TableCell>
 
         <TableCell align="right">{userId}</TableCell>
-        <TableCell align="right">{fCurrency(amount)}</TableCell>
+        <TableCell align="right">₦{fCurrency(amount)}</TableCell>
         <TableCell align="right">{term} Days</TableCell>
         <TableCell align="right">{purpose}</TableCell>
         <TableCell align="right">{interestRate}</TableCell>

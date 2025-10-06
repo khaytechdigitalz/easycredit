@@ -115,7 +115,7 @@ function AppNewInvoiceRow({ row }: AppNewInvoiceRowProps) {
 
         <TableCell>{row.purpose}</TableCell>
 
-        <TableCell>{fCurrency(row.amount)}</TableCell>
+        <TableCell>₦{fCurrency(row.amount)}</TableCell>
 
         <TableCell>
           <Label

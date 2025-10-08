@@ -86,6 +86,7 @@ export const PATH_DASHBOARD = {
   client: {
     root: path(ROOTS_DASHBOARD, '/client'),
     list: path(ROOTS_ADMIN, '/client/list'),
+    view: (view: string) =>  path(ROOTS_ADMIN, `/client/${view}`),
     create: path(ROOTS_ADMIN, '/client/create'),
   },
 

@@ -39,6 +39,7 @@ export type IProduct = {
   last_name: string;
   email: string;
   phone: string;
+  status: string;
   nationality: string;
   phoneVerified: boolean;
   inventoryType: string;

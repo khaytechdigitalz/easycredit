@@ -2,14 +2,12 @@ import { paramCase } from 'change-case';
 import { useState, useEffect } from 'react';
 // next
 import Head from 'next/head';
-import NextLink from 'next/link';
 import { useRouter } from 'next/router';
 
 // @mui
 import {
   Card,
   Table,
-  Button,
   Tooltip,
   TableBody,
   Container,
@@ -20,7 +18,6 @@ import { SelectChangeEvent } from '@mui/material/Select';
 // redux
 import axios from '../../../utils/axios';
 import { useDispatch, useSelector } from '../../../redux/store';
-import { getProducts } from '../../../redux/slices/product';
 // routes
 import { PATH_DASHBOARD } from '../../../routes/paths';
 // @types
@@ -43,7 +40,6 @@ import {
 import Iconify from '../../../components/iconify';
 import Scrollbar from '../../../components/scrollbar';
 import CustomBreadcrumbs from '../../../components/custom-breadcrumbs';
-import ConfirmDialog from '../../../components/confirm-dialog';
 // sections
 import { ProductTableRow, ProductTableToolbar } from '../../../sections/@dashboard/users/list';
 
@@ -84,7 +80,6 @@ export default function EcommerceProductListPage() {
     setPage,
     //
     selected,
-    setSelected,
     onSelectRow,
     onSelectAllRows,
     //
@@ -135,11 +130,7 @@ export default function EcommerceProductListPage() {
 
     fetchDashboardData();
   }, []);
-
-  useEffect(() => {
-    dispatch(getProducts());
-  }, [dispatch]);
-
+ 
   useEffect(() => {
     if (responselog?.length) {
       setTableData(responselog);
@@ -164,11 +155,7 @@ export default function EcommerceProductListPage() {
   const handleOpenConfirm = () => {
     setOpenConfirm(true);
   };
-
-  const handleCloseConfirm = () => {
-    setOpenConfirm(false);
-  };
-
+ 
   const handleFilterName = (event: React.ChangeEvent<HTMLInputElement>) => {
     setPage(0);
     setFilterName(event.target.value);
@@ -181,42 +168,10 @@ export default function EcommerceProductListPage() {
     setPage(0);
     setFilterStatus(typeof value === 'string' ? value.split(',') : value);
   };
-
-  const handleDeleteRow = (id: string) => {
-    const deleteRow = tableData.filter((row) => row.id !== id);
-    setSelected([]);
-    setTableData(deleteRow);
-
-    if (page > 0) {
-      if (dataInPage.length < 2) {
-        setPage(page - 1);
-      }
-    }
-  };
-
-  const handleDeleteRows = (selectedRows: string[]) => {
-    const deleteRows = tableData.filter((row) => !selectedRows.includes(row.id));
-    setSelected([]);
-    setTableData(deleteRows);
-
-    if (page > 0) {
-      if (selectedRows.length === dataInPage.length) {
-        setPage(page - 1);
-      } else if (selectedRows.length === dataFiltered.length) {
-        setPage(0);
-      } else if (selectedRows.length > dataInPage.length) {
-        const newPage = Math.ceil((tableData.length - selectedRows.length) / rowsPerPage) - 1;
-        setPage(newPage);
-      }
-    }
-  };
-
-  const handleEditRow = (id: string) => {
-    push(PATH_DASHBOARD.eCommerce.edit(paramCase(id)));
-  };
+  
 
   const handleViewRow = (id: string) => {
-    push(PATH_DASHBOARD.eCommerce.view(paramCase(id)));
+    push(PATH_DASHBOARD.client.view(paramCase(id)));
   };
 
   const handleResetFilter = () => {
@@ -227,7 +182,7 @@ export default function EcommerceProductListPage() {
   return (
     <>
       <Head>
-        <title> Loan: Loan Applications | Easy Credit</title>
+        <title> Users: Manage Users | Easy Credit</title>
       </Head>
 
       <Container maxWidth={themeStretch ? false : 'lg'}>
@@ -301,9 +256,7 @@ export default function EcommerceProductListPage() {
                           row={row}
                           selected={selected.includes(row._id)}
                           onSelectRow={() => onSelectRow(row._id)}
-                          onDeleteRow={() => handleDeleteRow(row._id)}
-                          onEditRow={() => handleEditRow(row.name)}
-                          onViewRow={() => handleViewRow(row.name)}
+                          onViewRow={() => handleViewRow(row._id)}
                         />
                       ) : (
                         !isNotFound && <TableSkeleton key={index} sx={{ height: denseHeight }} />
@@ -333,29 +286,7 @@ export default function EcommerceProductListPage() {
           />
         </Card>
       </Container>
-
-      <ConfirmDialog
-        open={openConfirm}
-        onClose={handleCloseConfirm}
-        title="Delete"
-        content={
-          <>
-            Are you sure want to delete <strong> {selected.length} </strong> items?
-          </>
-        }
-        action={
-          <Button
-            variant="contained"
-            color="error"
-            onClick={() => {
-              handleDeleteRows(selected);
-              handleCloseConfirm();
-            }}
-          >
-            Delete
-          </Button>
-        }
-      />
+ 
     </>
   );
 }

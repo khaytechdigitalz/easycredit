@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import NextLink from 'next/link';
 import { useRouter } from 'next/router';
+
 // @mui
 import {
   Card,
@@ -17,6 +18,7 @@ import {
 } from '@mui/material';
 import { SelectChangeEvent } from '@mui/material/Select';
 // redux
+import axios from '../../../utils/axios';
 import { useDispatch, useSelector } from '../../../redux/store';
 import { getProducts } from '../../../redux/slices/product';
 // routes
@@ -43,21 +45,25 @@ import Scrollbar from '../../../components/scrollbar';
 import CustomBreadcrumbs from '../../../components/custom-breadcrumbs';
 import ConfirmDialog from '../../../components/confirm-dialog';
 // sections
-import { ProductTableRow, ProductTableToolbar } from '../../../sections/@dashboard/e-commerce/list';
+import { ProductTableRow, ProductTableToolbar } from '../../../sections/@dashboard/users/list';
 
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
-  { id: 'name', label: 'Name', align: 'left' },
+  { id: 'name', label: 'ID', align: 'left' },
+  { id: 'name', label: 'First Name', align: 'left' },
+  { id: 'name', label: 'Last Name', align: 'left' },
+  { id: 'name', label: 'Gender', align: 'left' },
   { id: 'name', label: 'Email', align: 'left' },
-  { id: 'name', label: 'Role', align: 'left' },
-  { id: 'name', label: 'Date Created', align: 'left' },
+  { id: 'name', label: 'Phone', align: 'left' },
+  { id: 'name', label: 'Nationality', align: 'left' }, 
+  { id: 'name', label: 'Phone Verification Status', align: 'left' }, 
   { id: '' },
 ];
 
 const STATUS_OPTIONS = [
-  { value: 'active', label: 'Active' },
-  { value: 'inactive', label: 'Inactive' },
+  { value: 'paid', label: 'Paid' },
+  { value: 'pending', label: 'Pending' },
 ];
 
 // ----------------------------------------------------------------------
@@ -96,7 +102,7 @@ export default function EcommerceProductListPage() {
 
   const dispatch = useDispatch();
 
-  const { products, isLoading } = useSelector((state) => state.product);
+  const { isLoading } = useSelector((state) => state.product);
 
   const [tableData, setTableData] = useState<IProduct[]>([]);
 
@@ -106,15 +112,39 @@ export default function EcommerceProductListPage() {
 
   const [openConfirm, setOpenConfirm] = useState(false);
 
+
+  const [responselog, setDashlog] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        const accessToken = localStorage.getItem('accessToken');
+        const config = {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`
+          }
+        }; 
+
+        const requestResponse = await axios.get('/admin/user/list', config);
+        setDashlog(requestResponse.data.data.data);
+        
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
+
   useEffect(() => {
     dispatch(getProducts());
   }, [dispatch]);
 
   useEffect(() => {
-    if (products.length) {
-      setTableData(products);
+    if (responselog?.length) {
+      setTableData(responselog);
     }
-  }, [products]);
+  }, [responselog]);
 
   const dataFiltered = applyFilter({
     inputData: tableData,
@@ -197,30 +227,20 @@ export default function EcommerceProductListPage() {
   return (
     <>
       <Head>
-        <title> Branch: View Branches | Easy Credit</title>
+        <title> Loan: Loan Applications | Easy Credit</title>
       </Head>
 
       <Container maxWidth={themeStretch ? false : 'lg'}>
         <CustomBreadcrumbs
-          heading="Clients"
+          heading="Manage Users"
           links={[
             { name: 'Dashboard', href: PATH_DASHBOARD.root },
             {
-              name: 'Clients',
+              name: 'Users',
               href: '',
             },
-            { name: 'View Clients' },
+            { name: 'Manage Users' },
           ]}
-          action={
-            <Button
-              component={NextLink}
-              href={PATH_DASHBOARD.client.create}
-              variant="contained"
-              startIcon={<Iconify icon="eva:plus-fill" />}
-            >
-              Add Client
-            </Button>
-          }
         />
 
         <Card>
@@ -266,7 +286,7 @@ export default function EcommerceProductListPage() {
                   onSelectAllRows={(checked) =>
                     onSelectAllRows(
                       checked,
-                      tableData.map((row) => row.id)
+                      tableData.map((row) => row._id)
                     )
                   }
                 />
@@ -277,11 +297,11 @@ export default function EcommerceProductListPage() {
                     .map((row, index) =>
                       row ? (
                         <ProductTableRow
-                          key={row.id}
+                          key={row._id}
                           row={row}
-                          selected={selected.includes(row.id)}
-                          onSelectRow={() => onSelectRow(row.id)}
-                          onDeleteRow={() => handleDeleteRow(row.id)}
+                          selected={selected.includes(row._id)}
+                          onSelectRow={() => onSelectRow(row._id)}
+                          onDeleteRow={() => handleDeleteRow(row._id)}
                           onEditRow={() => handleEditRow(row.name)}
                           onViewRow={() => handleViewRow(row.name)}
                         />
@@ -365,7 +385,7 @@ function applyFilter({
 
   if (filterName) {
     inputData = inputData.filter(
-      (product) => product.name.toLowerCase().indexOf(filterName.toLowerCase()) !== -1
+      (product) => product.userId.toLowerCase().indexOf(filterName.toLowerCase()) !== -1
     );
   }
 

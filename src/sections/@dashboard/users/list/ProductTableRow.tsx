@@ -1,5 +1,4 @@
 import { useState } from 'react';
-import { sentenceCase } from 'change-case';
 // @mui
 import {
   Link,
@@ -13,7 +12,6 @@ import {
 } from '@mui/material';
 // utils
 import { fDate } from '../../../../utils/formatTime';
-import { fCurrency } from '../../../../utils/formatNumber';
 // @types
 import { IProduct } from '../../../../@types/product';
 // components
@@ -41,7 +39,7 @@ export default function ProductTableRow({
   onEditRow,
   onViewRow,
 }: Props) {
-  const { _id, userId, purpose,interestRate, term, status,amount, applicationDate } = row;
+  const { _id, first_name, last_name, gender, email, phone, phoneVerified,nationality } = row;
 
   const [openConfirm, setOpenConfirm] = useState(false);
 
@@ -72,33 +70,31 @@ export default function ProductTableRow({
 
         <TableCell>
           <Stack direction="row" alignItems="center" spacing={2}>
-              {fDate(applicationDate)} 
-          </Stack>
-        </TableCell>
-        <TableCell>
-          <Stack direction="row" alignItems="center" spacing={2}>
               {_id} 
           </Stack>
         </TableCell>
 
-        <TableCell align="right">{userId}</TableCell>
-        <TableCell align="right">₦{fCurrency(amount)}</TableCell>
-        <TableCell align="right">{term} Days</TableCell>
-        <TableCell align="right">{purpose}</TableCell>
-        <TableCell align="right">{interestRate}</TableCell>
+        <TableCell align="right">{first_name}</TableCell>
+        <TableCell align="right">{last_name}</TableCell>
+        <TableCell align="right">{gender}</TableCell>
+        <TableCell align="right">{email}</TableCell>
+        <TableCell align="right">{phone}</TableCell>
+        <TableCell align="right">{nationality}</TableCell>
         <TableCell align="center">
           <Label
             variant="soft"
             color={
-              (status === 'paid' && 'success') ||
-              (status === 'pending' && 'warning') ||
+              (phoneVerified === true && 'success') ||
               'error'
             }
             sx={{ textTransform: 'capitalize' }}
           >
-            {status ? sentenceCase(status) : ''}
+            {
+              (phoneVerified === true && 'Verified') ||
+              'Not Verified'
+            }
           </Label>
-        </TableCell>
+        </TableCell> 
  
 
 

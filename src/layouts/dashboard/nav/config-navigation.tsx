@@ -61,14 +61,14 @@ const navConfig = [
         children: [
  
           { title: 'Manage Loans ', path: PATH_DASHBOARD.loan.applications },
-          { title: 'Loans Products', path: PATH_DASHBOARD.loan.product },
-          { title: 'View Loans', path: PATH_DASHBOARD.loan.loans },
-          { title: 'Create Loans', path: PATH_DASHBOARD.loan.create_new_loan },
-          { title: 'Loan Repayment', path: PATH_DASHBOARD.loan.repayments },
-          { title: 'Manage Charges', path: PATH_DASHBOARD.loan.charges },
-          { title: 'Loan Calculator', path: PATH_DASHBOARD.loan.calculator },
-          { title: 'Manage Cash Register', path: PATH_DASHBOARD.loan.register },
-          { title: 'Loan Provision', path: PATH_DASHBOARD.loan.provision },
+         // { title: 'Loans Products', path: PATH_DASHBOARD.loan.product },
+         // { title: 'View Loans', path: PATH_DASHBOARD.loan.loans },
+         // { title: 'Create Loans', path: PATH_DASHBOARD.loan.create_new_loan },
+         // { title: 'Loan Repayment', path: PATH_DASHBOARD.loan.repayments },
+         // { title: 'Manage Charges', path: PATH_DASHBOARD.loan.charges },
+         // { title: 'Loan Calculator', path: PATH_DASHBOARD.loan.calculator },
+         // { title: 'Manage Cash Register', path: PATH_DASHBOARD.loan.register },
+         // { title: 'Loan Provision', path: PATH_DASHBOARD.loan.provision },
            
         ],
       },
@@ -76,7 +76,7 @@ const navConfig = [
 
       // USER
       {
-        title: 'Client',
+        title: 'Users',
         path: PATH_DASHBOARD.client.list,
         icon: ICONS.user,
         children: [ 
@@ -85,6 +85,7 @@ const navConfig = [
         ],
       },
       // INVOICE
+      /*
       {
         title: 'Accouting',
         path: PATH_DASHBOARD.accounting.view,
@@ -94,6 +95,7 @@ const navConfig = [
           { title: 'Journals Of Account', path: PATH_DASHBOARD.accounting.journal },
         ],
       },
+      */
 
       // Branches
       {
@@ -126,6 +128,7 @@ const navConfig = [
 
 
       // INCOME
+      /*
       {
         title: 'Income',
         path: PATH_DASHBOARD.eCommerce.root,
@@ -138,6 +141,7 @@ const navConfig = [
            
         ],
       },
+      */
 
 
       // REPORT
@@ -148,6 +152,7 @@ const navConfig = [
       },
 
        // Payroll
+      /*
       {
         title: 'Payroll',
         path: PATH_DASHBOARD.eCommerce.root,
@@ -174,6 +179,7 @@ const navConfig = [
            
         ],
       },
+      */
 
 
       // BLOG

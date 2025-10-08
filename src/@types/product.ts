@@ -35,7 +35,12 @@ export type IProduct = {
   }[];
   reviews: IProductReview[];
   colors: string[];
-  status: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone: string;
+  nationality: string;
+  phoneVerified: boolean;
   inventoryType: string;
   sizes: string[];
   available: number;

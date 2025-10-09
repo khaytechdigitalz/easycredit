@@ -5,24 +5,20 @@ import { Grid, Card, Typography, Stack } from '@mui/material';
 import {
   IUserAccountBillingCreditCard,
   IUserAccountBillingAddress,
-  IUserAccountBillingInvoice,
 } from '../../../../../@types/user';
 //
 import axios from '../../../../../utils/axios';
 
-import AccountBillingAddressBook from './AccountBeneficiary';
 import AccountBillingPaymentMethod from './AccountWallets';
-import AccountBillingInvoiceHistory from './AccountLoanHistory';
  
 // ----------------------------------------------------------------------
 
 type Props = {
   cards: IUserAccountBillingCreditCard[];
-  invoices: IUserAccountBillingInvoice[];
   addressBook: IUserAccountBillingAddress[];
 };
 
-export default function AccountBilling({ cards, addressBook, invoices }: Props) {
+export default function AccountBilling({ cards, addressBook }: Props) {
   const urlPath = window.location.pathname;
   const id = urlPath.split('/').filter(Boolean).pop(); 
   const [responseData, setResponseData] = useState<any>(null);
@@ -52,7 +48,7 @@ export default function AccountBilling({ cards, addressBook, invoices }: Props) 
       
 
       {responseData?.data.map((data: { id: string; bankName: string; bankCode: string; accountName: string; accountNumber: string; walletId: string; customerId: string;}) => (
-        <Grid item xs={12} md={8} key={data.id}>
+        <Grid item xs={12} md={12} key={data.id}>
           <Stack spacing={3}>
             <Card sx={{ p: 3 }}>
               <Typography
@@ -71,14 +67,10 @@ export default function AccountBilling({ cards, addressBook, invoices }: Props) 
 
             <AccountBillingPaymentMethod cards={cards} />
 
-            <AccountBillingAddressBook addressBook={addressBook} />
           </Stack>
         </Grid>
       ))}
-
-      <Grid item xs={12} md={4}>
-        <AccountBillingInvoiceHistory invoices={invoices} />
-      </Grid>
+ 
     </Grid>
   );
 }

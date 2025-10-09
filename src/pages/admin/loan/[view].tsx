@@ -1,20 +1,16 @@
-import { paramCase } from 'change-case';
 import { useState, useEffect } from 'react';
 // next
 import Head from 'next/head';
-import { useRouter } from 'next/router';
 
 // @mui
 import {
   Card,
   Table,
-  Tooltip,
+  Grid,
   TableBody,
   Container,
-  IconButton,
   TableContainer,
 } from '@mui/material';
-import { SelectChangeEvent } from '@mui/material/Select';
 // redux
 import axios from '../../../utils/axios';
 import { useSelector } from '../../../redux/store';
@@ -34,34 +30,24 @@ import {
   TableSkeleton,
   TableEmptyRows,
   TableHeadCustom,
-  TableSelectedAction,
   TablePaginationCustom,
 } from '../../../components/table';
-import Iconify from '../../../components/iconify';
 import Scrollbar from '../../../components/scrollbar';
 import CustomBreadcrumbs from '../../../components/custom-breadcrumbs';
 // sections
-import { ProductTableRow, ProductTableToolbar } from '../../../sections/@dashboard/loans/list';
-
+import { ProductDetailsTableRow } from '../../../sections/@dashboard/loans/list';
+import { LoanStat } from '../../../sections/@dashboard/loans/details';
+ 
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
-  { id: 'name', label: 'ID', align: 'left' },
-  { id: 'name', label: 'User ID', align: 'left' },
-  { id: 'name', label: 'Amount', align: 'left' },
-  { id: 'name', label: 'Term', align: 'left' },
-  { id: 'name', label: 'Purpose', align: 'left' },
-  { id: 'name', label: 'Interest Rate', align: 'left' },
+  { id: 'name', label: 'Due Date', align: 'left' },
+   { id: 'name', label: 'Amount', align: 'left' },
+  { id: 'name', label: 'Amount Paid', align: 'left' }, 
   { id: 'name', label: 'Status', align: 'left' },
-  { id: 'name', label: 'Date', align: 'left' }, 
   { id: '' },
 ];
-
-const STATUS_OPTIONS = [
-  { value: 'paid', label: 'Paid' },
-  { value: 'pending', label: 'Pending' },
-];
-
+ 
 // ----------------------------------------------------------------------
 
 EcommerceProductListPage.getLayout = (page: React.ReactElement) => (
@@ -77,11 +63,9 @@ export default function EcommerceProductListPage() {
     order,
     orderBy,
     rowsPerPage,
-    setPage,
-    //
+     //
     selected,
     onSelectRow,
-    onSelectAllRows,
     //
     onSort,
     onChangeDense,
@@ -93,19 +77,20 @@ export default function EcommerceProductListPage() {
 
   const { themeStretch } = useSettingsContext();
 
-  const { push } = useRouter();
-
   const { isLoading } = useSelector((state) => state.product);
 
   const [tableData, setTableData] = useState<IProduct[]>([]);
 
-  const [filterName, setFilterName] = useState('');
+  const [filterName] = useState('');
 
-  const [filterStatus, setFilterStatus] = useState<string[]>([]);
+  const [filterStatus] = useState<string[]>([]);
 
 
   const [loanlog, setDashlog] = useState<any>(null);
+  const [loanstat, setDashstat] = useState<any>(null);
 
+  const urlPath = window.location.pathname;
+  const id = urlPath.split('/').filter(Boolean).pop(); 
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
@@ -116,21 +101,28 @@ export default function EcommerceProductListPage() {
           }
         }; 
 
-        const loansResponse = await axios.get('/admin-dashboard/d/recent-loans', config);
-        setDashlog(loansResponse.data);
+        const loansResponse = await axios.get(`/admin/loans/details/${id}`, config);
+        setDashlog(loansResponse.data.data.repaymentSchedule);
+        setDashstat(loansResponse.data.data);
       } catch (error) {
         console.error(error);
       }
     };
 
     fetchDashboardData();
-  }, []);
+  }, [id]);
  
   useEffect(() => {
     if (loanlog?.length) {
       setTableData(loanlog);
     }
   }, [loanlog]);
+
+  useEffect(() => {
+    if (loanstat?.length) {
+      setTableData(loanstat);
+    }
+  }, [loanstat]);
 
   const dataFiltered = applyFilter({
     inputData: tableData,
@@ -142,86 +134,41 @@ export default function EcommerceProductListPage() {
 
   const denseHeight = dense ? 60 : 80;
 
-  const isFiltered = filterName !== '' || !!filterStatus.length;
-
   const isNotFound = (!dataFiltered.length && !!filterName) || (!isLoading && !dataFiltered.length);
-
-  const handleOpenConfirm = () => {
-  };
- 
-  const handleFilterName = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setPage(0);
-    setFilterName(event.target.value);
-  };
-
-  const handleFilterStatus = (event: SelectChangeEvent<string[]>) => {
-    const {
-      target: { value },
-    } = event;
-    setPage(0);
-    setFilterStatus(typeof value === 'string' ? value.split(',') : value);
-  };
-  
-
-  const handleViewRow = (id: string) => {
-    push(PATH_DASHBOARD.loan.view(paramCase(id)));
-  };
-
-  const handleResetFilter = () => {
-    setFilterName('');
-    setFilterStatus([]);
-  };
 
   return (
     <>
       <Head>
-        <title> Loan: Loan Applications | Easy Credit</title>
+        <title> Loan: Loan Details | Easy Credit</title>
       </Head>
 
       <Container maxWidth={themeStretch ? false : 'xl'}>
         <CustomBreadcrumbs
-          heading="Loan Applications"
+          heading="Loan Details"
           links={[
             { name: 'Dashboard', href: PATH_DASHBOARD.root },
             {
               name: 'Loan',
               href: '',
             },
-            { name: 'Loan Applications' },
+            { name: 'Loan Details' },
           ]}
         />
 
-        <Card>
-          <ProductTableToolbar
-            filterName={filterName}
-            filterStatus={filterStatus}
-            onFilterName={handleFilterName}
-            onFilterStatus={handleFilterStatus}
-            statusOptions={STATUS_OPTIONS}
-            isFiltered={isFiltered}
-            onResetFilter={handleResetFilter}
-          />
+        <Card> 
 
-          <TableContainer sx={{ position: 'relative', overflow: 'unset' }}>
-            <TableSelectedAction
-              dense={dense}
-              numSelected={selected.length}
-              rowCount={tableData.length}
-              onSelectAllRows={(checked) =>
-                onSelectAllRows(
-                  checked,
-                  tableData.map((row) => row.id)
-                )
-              }
-              action={
-                <Tooltip title="Delete">
-                  <IconButton color="primary" onClick={handleOpenConfirm}>
-                    <Iconify icon="eva:trash-2-outline" />
-                  </IconButton>
-                </Tooltip>
-              }
+          <Grid item xs={12} md={6} lg={4}>
+            <LoanStat
+              title="Total Loan"
+              currentBalance={loanstat?.amount}
+              statistics={loanstat}
+              sentAmount={loanstat?.term}
             />
-
+          </Grid>
+          <br/>
+          
+          <TableContainer sx={{ position: 'relative', overflow: 'unset' }}>
+            
             <Scrollbar>
               <Table size={dense ? 'small' : 'medium'} sx={{ minWidth: 960 }}>
                 <TableHeadCustom
@@ -230,7 +177,8 @@ export default function EcommerceProductListPage() {
                   headLabel={TABLE_HEAD}
                   rowCount={tableData.length}
                   numSelected={selected.length}
-                  onSort={onSort} 
+                  onSort={onSort}
+                 
                 />
 
                 <TableBody>
@@ -238,12 +186,12 @@ export default function EcommerceProductListPage() {
                     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                     .map((row, index) =>
                       row ? (
-                        <ProductTableRow
+                        <ProductDetailsTableRow
                           key={row?._id}
                           row={row}
                           selected={selected.includes(row?._id)}
                           onSelectRow={() => onSelectRow(row?._id)}
-                          onViewRow={() => handleViewRow(row?._id)}
+                          onViewRow={() => null}
                         />
                       ) : (
                         !isNotFound && <TableSkeleton key={index} sx={{ height: denseHeight }} />

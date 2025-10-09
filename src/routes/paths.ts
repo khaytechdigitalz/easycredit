@@ -60,11 +60,14 @@ export const PATH_DASHBOARD = {
 
   loan: {
     root: path(ROOTS_DASHBOARD, '/loan'),
+    applications: path(ROOTS_ADMIN, '/loan/applications'),
+    view: (id: string) =>  path(ROOTS_ADMIN, `/loan/${id}`),
+
     product: path(ROOTS_ADMIN, '/loan/product'),
     create_product: path(ROOTS_ADMIN, '/loan/create_product'),
     loans: path(ROOTS_ADMIN, '/loan/loans'),
     create_new_loan: path(ROOTS_ADMIN, '/loan/create_loan'),
-    applications: path(ROOTS_ADMIN, '/loan/applications'),
+
     create: path(ROOTS_ADMIN, '/loan/create'),
     repayments: path(ROOTS_ADMIN, '/loan/repayments'),
     repayment_bulk: path(ROOTS_ADMIN, '/loan/repayment_bulk'),

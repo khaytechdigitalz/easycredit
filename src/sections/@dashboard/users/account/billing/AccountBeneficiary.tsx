@@ -3,19 +3,15 @@ import { useEffect, useState } from 'react';
 
 import { Box, Card, Button, Typography, Stack, Divider } from '@mui/material';
 // @types
-import { IUserAccountBillingAddress } from '../../../../../@types/user';
 import axios from '../../../../../utils/axios';
 
 // components
 import Iconify from '../../../../../components/iconify';
 
 // ----------------------------------------------------------------------
+ 
 
-type Props = {
-  addressBook: IUserAccountBillingAddress[];
-};
-
-export default function AccountBillingAddressBook({ addressBook }: Props) {
+export default function AccountBillingAddressBook() {
 
  const urlPath = window.location.pathname;
   const id = urlPath.split('/').filter(Boolean).pop(); 

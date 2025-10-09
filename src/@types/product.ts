@@ -38,6 +38,9 @@ export type IProduct = {
   first_name: string;
   last_name: string;
   email: string;
+  amountDue:string,
+  amountPaid: string;
+  dueDate: string;
   phone: string;
   status: string;
   nationality: string;

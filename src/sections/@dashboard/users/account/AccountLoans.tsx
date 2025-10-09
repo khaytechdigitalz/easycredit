@@ -1,19 +1,18 @@
-// form
+import { paramCase } from 'change-case';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 
 // @mui
 import { Card, Typography,
   Table,
-   Tooltip,
   TableBody,
-   IconButton,
   TableContainer, } from '@mui/material';
 // @types
 import axios from '../../../../utils/axios';
-import { useDispatch, useSelector } from '../../../../redux/store';
+import { useSelector } from '../../../../redux/store';
 // @types
 import { IProduct } from '../../../../@types/product';
+import { PATH_DASHBOARD } from '../../../../routes/paths';
 
 // components 
 
@@ -25,15 +24,13 @@ import {
   TableSkeleton,
   TableEmptyRows,
   TableHeadCustom,
-  TableSelectedAction,
   TablePaginationCustom,
 } from '../../../../components/table';
 import Scrollbar from '../../../../components/scrollbar';
 
 // ----------------------------------------------------------------------
- import { ProductTableRow, ProductTableToolbar } from '../../../../sections/@dashboard/loans/list';
+ import { ProductTableRow, ProductTableToolbar } from '../../loans/list';
 // ----------------------------------------------------------------------
-import Iconify from '../../../../components/iconify';
 
  
 const TABLE_HEAD = [
@@ -137,8 +134,8 @@ const {
     setFilterName(event.target.value);
   };
  
-  const handleViewRow = (id: string) => {
-    push(PATH_DASHBOARD.eCommerce.view(paramCase(id)));
+  const handleViewRow = (_id: string) => {
+    push(PATH_DASHBOARD.eCommerce.view(paramCase(_id)));
   };
 
   const handleResetFilter = () => {

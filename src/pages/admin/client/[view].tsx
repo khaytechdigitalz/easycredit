@@ -5,8 +5,6 @@ import Head from 'next/head';
 import { Container, Tab, Tabs, Box } from '@mui/material';
 // routes
 import { PATH_DASHBOARD } from '../../../routes/paths';
-// _mock_
-import { _userPayment, _userAddressBook, _userInvoices, _userAbout } from '../../../_mock/arrays';
 // layouts
 import DashboardLayout from '../../../layouts/dashboard';
 // components
@@ -45,9 +43,8 @@ export default function UserAccountPage() {
       icon: <Iconify icon="ic:round-receipt" />,
       component: (
         <AccountBilling
-          cards={_userPayment}
-          addressBook={_userAddressBook}
-          invoices={_userInvoices}
+          cards={[]}
+          addressBook={[]}
         />
       ),
     },
@@ -73,7 +70,7 @@ export default function UserAccountPage() {
         <title> User: Account Settings | Minimal UI</title>
       </Head>
 
-      <Container maxWidth={themeStretch ? false : 'lg'}>
+      <Container maxWidth={themeStretch ? false : 'xl'}>
         <CustomBreadcrumbs
           heading="Account"
           links={[

@@ -17,7 +17,7 @@ import {
 import { SelectChangeEvent } from '@mui/material/Select';
 // redux
 import axios from '../../../utils/axios';
-import { useDispatch, useSelector } from '../../../redux/store';
+import { useSelector } from '../../../redux/store';
 // routes
 import { PATH_DASHBOARD } from '../../../routes/paths';
 // @types
@@ -95,8 +95,6 @@ export default function EcommerceProductListPage() {
 
   const { push } = useRouter();
 
-  const dispatch = useDispatch();
-
   const { isLoading } = useSelector((state) => state.product);
 
   const [tableData, setTableData] = useState<IProduct[]>([]);
@@ -105,7 +103,7 @@ export default function EcommerceProductListPage() {
 
   const [filterStatus, setFilterStatus] = useState<string[]>([]);
 
-  const [openConfirm, setOpenConfirm] = useState(false);
+  const [setOpenConfirm] = useState(false);
 
 
   const [responselog, setDashlog] = useState<any>(null);
@@ -144,7 +142,6 @@ export default function EcommerceProductListPage() {
     filterStatus,
   });
 
-  const dataInPage = dataFiltered.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage);
 
   const denseHeight = dense ? 60 : 80;
 
@@ -153,7 +150,6 @@ export default function EcommerceProductListPage() {
   const isNotFound = (!dataFiltered.length && !!filterName) || (!isLoading && !dataFiltered.length);
 
   const handleOpenConfirm = () => {
-    setOpenConfirm(true);
   };
  
   const handleFilterName = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -185,7 +181,7 @@ export default function EcommerceProductListPage() {
         <title> Users: Manage Users | Easy Credit</title>
       </Head>
 
-      <Container maxWidth={themeStretch ? false : 'lg'}>
+      <Container maxWidth={themeStretch ? false : 'xl'}>
         <CustomBreadcrumbs
           heading="Manage Users"
           links={[

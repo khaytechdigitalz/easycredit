@@ -2,11 +2,8 @@ import { useState } from 'react';
 import { sentenceCase } from 'change-case';
 // @mui
 import {
-  Link,
   Stack,
-  Button,
   TableRow,
-  Checkbox,
   MenuItem,
   TableCell,
   IconButton,
@@ -51,10 +48,7 @@ export default function ProductTableRow({
 
   return (
     <>
-      <TableRow hover selected={selected}>
-        <TableCell padding="checkbox">
-          <Checkbox checked={selected} onClick={onSelectRow} />
-        </TableCell>
+      <TableRow hover selected={selected}> 
 
         <TableCell>
           <Stack direction="row" alignItems="center" spacing={2}>

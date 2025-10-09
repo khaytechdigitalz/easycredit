@@ -1,6 +1,5 @@
 import * as Yup from 'yup';
 import { useCallback, useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
 
 // form
 import { useForm } from 'react-hook-form';
@@ -15,7 +14,6 @@ import { fData } from '../../../../utils/formatNumber';
 // assets
 import axios from '../../../../utils/axios';
 
-import { countries } from '../../../../assets/data';
 // components
 import { CustomFile } from '../../../../components/upload';
 import { useSnackbar } from '../../../../components/snackbar';
@@ -47,10 +45,9 @@ export default function AccountGeneral() {
   const { enqueueSnackbar } = useSnackbar();
 
   const { user } = useAuthContext();  
-  const view  = useParams();
-  alert(view);
-
-  const [requestResponse, setRequestResponse] = useState<any>(null);
+  const urlPath = window.location.pathname;
+  const id = urlPath.split('/').filter(Boolean).pop(); 
+  const [responseData, setResponseData] = useState<any>(null);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -61,35 +58,27 @@ export default function AccountGeneral() {
             'Authorization': `Bearer ${accessToken}`
           }
         }; 
-        const response = await axios.get(`/admin/user/details/list/'${view}`, config);
+        const response = await axios.get(`/admin/user/details/${id}`, config);
+        setResponseData(response.data.data);
       } catch (error) {
         console.error(error);
       }
     };
 
     fetchDashboardData();
-  }, []);
-
+  }, [id]);
+  
   const UpdateUserSchema = Yup.object().shape({
     first_name: Yup.string().required('First name is required'),
     last_name: Yup.string().required('Last name is required'),
-    email: Yup.string().required('Email is required').email('Email must be a valid email address'),
-    photoURL: Yup.string().required('Avatar is required').nullable(true),
-    phoneNumber: Yup.string().required('Phone number is required'),
-    country: Yup.string().required('Country is required'),
-    address: Yup.string().required('Address is required'),
-    state: Yup.string().required('State is required'),
-    city: Yup.string().required('City is required'),
-    zipCode: Yup.string().required('Zip code is required'),
-    about: Yup.string().required('About is required'),
   });
 
   const defaultValues = {
-    first_name: requestResponse?.first_name || '',
-    last_name: requestResponse?.last_name || '',
-    email: user?.email || '',
+    first_name: responseData?.first_name || '',
+    last_name: responseData?.last_name || '',
+    email: responseData?.email || '',
     photoURL: user?.photoURL || null,
-    phoneNumber: user?.phoneNumber || '',
+    phoneNumber: responseData?.phone || '',
     country: user?.country || '',
     address: user?.address || '',
     state: user?.state || '',
@@ -181,35 +170,24 @@ export default function AccountGeneral() {
                 sm: 'repeat(2, 1fr)',
               }}
             >
-              <RHFTextField name="first_name" label="First Name" />
+              <RHFTextField name="first_name" focused value={responseData?.first_name} label="First Name" />
 
-              <RHFTextField name="last_name" label="Last Name" />
+              <RHFTextField name="last_name" focused value={responseData?.last_name} label="Last Name" />
 
-              <RHFTextField name="email" label="Email Address" />
+              <RHFTextField name="email" focused  value={responseData?.email} label="Email Address" />
 
-              <RHFTextField name="phoneNumber" label="Phone Number" />
+              <RHFTextField name="phone" focused  value={responseData?.phone} label="Phone Number" />
 
-              <RHFTextField name="address" label="Address" />
-
-              <RHFSelect native name="country" label="Country" placeholder="Country">
-                <option value="" />
-                {countries.map((country) => (
-                  <option key={country.code} value={country.label}>
-                    {country.label}
-                  </option>
-                ))}
-              </RHFSelect>
-
-              <RHFTextField name="state" label="State/Region" />
-
-              <RHFTextField name="city" label="City" />
-
-              <RHFTextField name="zipCode" label="Zip/Code" />
+              <RHFTextField name="gender" focused  value={responseData?.gender}  label="Gender" />
+              <RHFTextField name="nationality" focused  value={responseData?.bvn}  label="Nationality" />
+              <RHFTextField name="bvn" focused  value={responseData?.bvn}  label="BVN" />
+              <RHFTextField name="xpressCustomerId" focused  value={responseData?.xpressCustomerId}  label="Xpress Customer Id" />
+              <RHFTextField name="xpressWalletId" focused  value={responseData?.xpressWalletId}  label="Xpress Wallet Id" />
+ 
             </Box>
 
             <Stack spacing={3} alignItems="flex-end" sx={{ mt: 3 }}>
-              <RHFTextField name="about" multiline rows={4} label="About" />
-
+              { /* <RHFTextField name="about" multiline rows={4} label="About" /> */ }
               <LoadingButton type="submit" variant="contained" loading={isSubmitting}>
                 Save Changes
               </LoadingButton>

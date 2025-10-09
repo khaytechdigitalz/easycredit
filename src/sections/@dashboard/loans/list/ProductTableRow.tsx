@@ -20,41 +20,27 @@ import { IProduct } from '../../../../@types/product';
 import Label from '../../../../components/label';
 import Iconify from '../../../../components/iconify';
 import MenuPopover from '../../../../components/menu-popover';
-import ConfirmDialog from '../../../../components/confirm-dialog';
 
 // ----------------------------------------------------------------------
 
 type Props = {
   row: IProduct;
   selected: boolean;
-  onEditRow: VoidFunction;
   onViewRow: VoidFunction;
   onSelectRow: VoidFunction;
-  onDeleteRow: VoidFunction; 
-};
+ };
 
 export default function ProductTableRow({
   row,
   selected,
   onSelectRow,
-  onDeleteRow,
-  onEditRow,
   onViewRow,
 }: Props) {
   const { _id, userId, purpose,interestRate, term, status,amount, applicationDate } = row;
 
-  const [openConfirm, setOpenConfirm] = useState(false);
 
   const [openPopover, setOpenPopover] = useState<HTMLElement | null>(null);
-
-  const handleOpenConfirm = () => {
-    setOpenConfirm(true);
-  };
-
-  const handleCloseConfirm = () => {
-    setOpenConfirm(false);
-  };
-
+  
   const handleOpenPopover = (event: React.MouseEvent<HTMLElement>) => {
     setOpenPopover(event.currentTarget);
   };
@@ -115,39 +101,19 @@ export default function ProductTableRow({
         arrow="right-top"
         sx={{ width: 140 }}
       >
-        <MenuItem
-          onClick={() => {
-            handleOpenConfirm();
-            handleClosePopover();
-          }}
-          sx={{ color: 'error.main' }}
-        >
-          <Iconify icon="eva:trash-2-outline" />
-          Delete
-        </MenuItem>
+        
 
         <MenuItem
           onClick={() => {
-            onEditRow();
+            onViewRow();
             handleClosePopover();
           }}
         >
           <Iconify icon="eva:edit-fill" />
-          Edit
+          View
         </MenuItem>
       </MenuPopover>
-
-      <ConfirmDialog
-        open={openConfirm}
-        onClose={handleCloseConfirm}
-        title="Delete"
-        content="Are you sure want to delete?"
-        action={
-          <Button variant="contained" color="error" onClick={onDeleteRow}>
-            Delete
-          </Button>
-        }
-      />
+ 
     </>
   );
 }

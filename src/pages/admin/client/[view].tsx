@@ -17,8 +17,7 @@ import { useSettingsContext } from '../../../components/settings';
 import {
   AccountGeneral,
   AccountBilling,
-  AccountSocialLinks,
-  AccountNotifications,
+  AccountLoans,
   AccountChangePassword,
 } from '../../../sections/@dashboard/users/account';
 
@@ -36,13 +35,13 @@ export default function UserAccountPage() {
   const TABS = [
     {
       value: 'general',
-      label: 'General',
+      label: 'Account',
       icon: <Iconify icon="ic:round-account-box" />,
       component: <AccountGeneral />,
     },
     {
       value: 'billing',
-      label: 'Billing',
+      label: 'Wallet',
       icon: <Iconify icon="ic:round-receipt" />,
       component: (
         <AccountBilling
@@ -52,18 +51,14 @@ export default function UserAccountPage() {
         />
       ),
     },
+
     {
-      value: 'notifications',
-      label: 'Notifications',
-      icon: <Iconify icon="eva:bell-fill" />,
-      component: <AccountNotifications />,
+      value: 'loan',
+      label: 'Loans',
+      icon: <Iconify icon="ic:round-receipt" />,
+      component: <AccountLoans />,
     },
-    {
-      value: 'social_links',
-      label: 'Social links',
-      icon: <Iconify icon="eva:share-fill" />,
-      component: <AccountSocialLinks socialLinks={_userAbout.socialLinks} />,
-    },
+    
     {
       value: 'change_password',
       label: 'Change password',

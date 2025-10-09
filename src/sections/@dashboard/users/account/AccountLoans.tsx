@@ -1,33 +1,22 @@
-import { paramCase } from 'change-case';
+// form
 import { useState, useEffect } from 'react';
-// next
-import Head from 'next/head';
-import NextLink from 'next/link';
 import { useRouter } from 'next/router';
 
 // @mui
-import {
-  Card,
+import { Card, Typography,
   Table,
-  Button,
-  Tooltip,
+   Tooltip,
   TableBody,
-  Container,
-  IconButton,
-  TableContainer,
-} from '@mui/material';
-import { SelectChangeEvent } from '@mui/material/Select';
-// redux
-import axios from '../../../utils/axios';
-import { useDispatch, useSelector } from '../../../redux/store';
- // routes
-import { PATH_DASHBOARD } from '../../../routes/paths';
+   IconButton,
+  TableContainer, } from '@mui/material';
 // @types
-import { IProduct } from '../../../@types/product';
-// layouts
-import DashboardLayout from '../../../layouts/dashboard';
-// components
-import { useSettingsContext } from '../../../components/settings';
+import axios from '../../../../utils/axios';
+import { useDispatch, useSelector } from '../../../../redux/store';
+// @types
+import { IProduct } from '../../../../@types/product';
+
+// components 
+
 import {
   useTable,
   getComparator,
@@ -38,16 +27,15 @@ import {
   TableHeadCustom,
   TableSelectedAction,
   TablePaginationCustom,
-} from '../../../components/table';
-import Iconify from '../../../components/iconify';
-import Scrollbar from '../../../components/scrollbar';
-import CustomBreadcrumbs from '../../../components/custom-breadcrumbs';
-import ConfirmDialog from '../../../components/confirm-dialog';
-// sections
-import { ProductTableRow, ProductTableToolbar } from '../../../sections/@dashboard/loans/list';
+} from '../../../../components/table';
+import Scrollbar from '../../../../components/scrollbar';
 
 // ----------------------------------------------------------------------
+ import { ProductTableRow, ProductTableToolbar } from '../../../../sections/@dashboard/loans/list';
+// ----------------------------------------------------------------------
+import Iconify from '../../../../components/iconify';
 
+ 
 const TABLE_HEAD = [
   { id: 'name', label: 'ID', align: 'left' },
   { id: 'name', label: 'User ID', align: 'left' },
@@ -64,17 +52,8 @@ const STATUS_OPTIONS = [
   { value: 'paid', label: 'Paid' },
   { value: 'pending', label: 'Pending' },
 ];
-
-// ----------------------------------------------------------------------
-
-EcommerceProductListPage.getLayout = (page: React.ReactElement) => (
-  <DashboardLayout>{page}</DashboardLayout>
-);
-
-// ----------------------------------------------------------------------
-
-export default function EcommerceProductListPage() {
-  const {
+export default function AccountNotifications() {
+const {
     dense,
     page,
     order,
@@ -83,7 +62,6 @@ export default function EcommerceProductListPage() {
     setPage,
     //
     selected,
-    setSelected,
     onSelectRow,
     onSelectAllRows,
     //
@@ -95,11 +73,9 @@ export default function EcommerceProductListPage() {
     defaultOrderBy: 'createdAt',
   });
 
-  const { themeStretch } = useSettingsContext();
-
+ 
   const { push } = useRouter();
 
-  const dispatch = useDispatch();
 
   const { isLoading } = useSelector((state) => state.product);
 
@@ -109,11 +85,12 @@ export default function EcommerceProductListPage() {
 
   const [filterStatus, setFilterStatus] = useState<string[]>([]);
 
-  const [openConfirm, setOpenConfirm] = useState(false);
-
 
   const [loanlog, setDashlog] = useState<any>(null);
 
+ const urlPath = window.location.pathname;
+  const id = urlPath.split('/').filter(Boolean).pop(); 
+  
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
@@ -123,8 +100,7 @@ export default function EcommerceProductListPage() {
             'Authorization': `Bearer ${accessToken}`
           }
         }; 
-
-        const loansResponse = await axios.get('/admin-dashboard/d/recent-loans', config);
+        const loansResponse = await axios.get(`/admin/users/${id}/loans`, config);
         setDashlog(loansResponse.data);
       } catch (error) {
         console.error(error);
@@ -132,8 +108,9 @@ export default function EcommerceProductListPage() {
     };
 
     fetchDashboardData();
-  }, []);
+  }, [id]);
  
+
   useEffect(() => {
     if (loanlog?.length) {
       setTableData(loanlog);
@@ -153,25 +130,13 @@ export default function EcommerceProductListPage() {
   const isFiltered = filterName !== '' || !!filterStatus.length;
 
   const isNotFound = (!dataFiltered.length && !!filterName) || (!isLoading && !dataFiltered.length);
+  
 
-  const handleOpenConfirm = () => {
-    setOpenConfirm(true);
-  };
- 
   const handleFilterName = (event: React.ChangeEvent<HTMLInputElement>) => {
     setPage(0);
     setFilterName(event.target.value);
   };
-
-  const handleFilterStatus = (event: SelectChangeEvent<string[]>) => {
-    const {
-      target: { value },
-    } = event;
-    setPage(0);
-    setFilterStatus(typeof value === 'string' ? value.split(',') : value);
-  };
-  
-
+ 
   const handleViewRow = (id: string) => {
     push(PATH_DASHBOARD.eCommerce.view(paramCase(id)));
   };
@@ -181,55 +146,25 @@ export default function EcommerceProductListPage() {
     setFilterStatus([]);
   };
 
+      
+
   return (
-    <>
-      <Head>
-        <title> Loan: Loan Applications | Easy Credit</title>
-      </Head>
+       <Card sx={{ p: 3 }}>
+        <Typography variant="overline" component="div" sx={{ color: 'text.secondary' }}>
+          Loan History
+        </Typography>
 
-      <Container maxWidth={themeStretch ? false : 'lg'}>
-        <CustomBreadcrumbs
-          heading="Loan Applications"
-          links={[
-            { name: 'Dashboard', href: PATH_DASHBOARD.root },
-            {
-              name: 'Loan',
-              href: '',
-            },
-            { name: 'Loan Applications' },
-          ]}
-        />
-
-        <Card>
           <ProductTableToolbar
             filterName={filterName}
             filterStatus={filterStatus}
             onFilterName={handleFilterName}
-            onFilterStatus={handleFilterStatus}
             statusOptions={STATUS_OPTIONS}
             isFiltered={isFiltered}
             onResetFilter={handleResetFilter}
           />
 
           <TableContainer sx={{ position: 'relative', overflow: 'unset' }}>
-            <TableSelectedAction
-              dense={dense}
-              numSelected={selected.length}
-              rowCount={tableData.length}
-              onSelectAllRows={(checked) =>
-                onSelectAllRows(
-                  checked,
-                  tableData.map((row) => row.id)
-                )
-              }
-              action={
-                <Tooltip title="Delete">
-                  <IconButton color="primary" onClick={handleOpenConfirm}>
-                    <Iconify icon="eva:trash-2-outline" />
-                  </IconButton>
-                </Tooltip>
-              }
-            />
+           
 
             <Scrollbar>
               <Table size={dense ? 'small' : 'medium'} sx={{ minWidth: 960 }}>
@@ -254,11 +189,11 @@ export default function EcommerceProductListPage() {
                     .map((row, index) =>
                       row ? (
                         <ProductTableRow
-                          key={row?._id}
+                          key={row._id}
                           row={row}
-                          selected={selected.includes(row?._id)}
-                          onSelectRow={() => onSelectRow(row?._id)}
-                          onViewRow={() => handleViewRow(row?._id)}
+                          selected={selected.includes(row._id)}
+                          onSelectRow={() => onSelectRow(row._id)}
+                          onViewRow={() => handleViewRow(row.name)}
                         />
                       ) : (
                         !isNotFound && <TableSkeleton key={index} sx={{ height: denseHeight }} />
@@ -285,15 +220,10 @@ export default function EcommerceProductListPage() {
             //
             dense={dense}
             onChangeDense={onChangeDense}
-          />
-        </Card>
-      </Container>
- 
-    </>
+          />        
+      </Card>
   );
 }
-
-// ----------------------------------------------------------------------
 
 function applyFilter({
   inputData,
@@ -328,3 +258,4 @@ function applyFilter({
 
   return inputData;
 }
+

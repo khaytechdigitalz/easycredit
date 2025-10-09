@@ -1,7 +1,11 @@
 // @mui
+import { useEffect, useState } from 'react';
+
 import { Box, Card, Button, Typography, Stack, Divider } from '@mui/material';
 // @types
 import { IUserAccountBillingAddress } from '../../../../../@types/user';
+import axios from '../../../../../utils/axios';
+
 // components
 import Iconify from '../../../../../components/iconify';
 
@@ -12,35 +16,54 @@ type Props = {
 };
 
 export default function AccountBillingAddressBook({ addressBook }: Props) {
+
+ const urlPath = window.location.pathname;
+  const id = urlPath.split('/').filter(Boolean).pop(); 
+  const [responseData, setResponseData] = useState<any>(null);
+ 
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        const accessToken = localStorage.getItem('accessToken');
+        const config = {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`
+          }
+        }; 
+        const response = await axios.get(`/admin/users/${id}/beneficiaries`, config);
+        setResponseData(response.data.data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchDashboardData();
+  }, [id]); 
   return (
     <Card sx={{ p: 3 }}>
       <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 3 }}>
         <Typography variant="overline" sx={{ color: 'text.secondary' }}>
-          Billing Info
-        </Typography>
-
-        <Button size="small" startIcon={<Iconify icon="eva:plus-fill" />}>
-          New Billing Address
-        </Button>
+          Beneficiary
+        </Typography> 
       </Stack>
 
       <Stack spacing={3} divider={<Divider sx={{ borderStyle: 'dashed' }} />}>
-        {addressBook.map((address) => (
-          <Stack key={address.id} spacing={1}>
-            <Typography variant="subtitle1">{address.name}</Typography>
+        {responseData?.data.map((beneficiary: { _id: string; accountName: string; accountNumber: string; bankName: string; }) => (
+          <Stack key={beneficiary._id} spacing={1}>
+            <Typography variant="subtitle1">{beneficiary.accountName}</Typography>
 
             <Typography variant="body2">
               <Box component="span" sx={{ color: 'text.secondary', mr: 0.5 }}>
-                Address:
+                Account Number:
               </Box>
-              {`${address.street}, ${address.city}, ${address.state}, ${address.country} ${address.zipCode}`}
+              {`${beneficiary.accountNumber}`}
             </Typography>
 
             <Typography variant="body2">
               <Box component="span" sx={{ color: 'text.secondary', mr: 0.5 }}>
-                Phone:
+                Bank Name:
               </Box>
-              {address.phone}
+              {beneficiary.bankName}
             </Typography>
 
             <Stack direction="row" spacing={1}>

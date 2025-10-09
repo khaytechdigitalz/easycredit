@@ -126,16 +126,16 @@ export default function LoanStat({
           </Label>
           </Typography>
         </Stack>
-
-        <Stack direction="row" spacing={1.5}>
-          <Button  onClick={handleOpenReject} fullWidth variant="contained" color="warning">
-            Reject Request
-          </Button>
-
-          <Button onClick={handleOpenApprove}  fullWidth variant="contained" color="success">
-            Approve Request
-          </Button>
-        </Stack>
+        {statistics?.status === 'pending' && (
+          <Stack direction="row" spacing={1.5}>
+            <Button onClick={handleOpenReject} fullWidth variant="contained" color="warning">
+              Reject Request
+            </Button>
+            <Button onClick={handleOpenApprove} fullWidth variant="contained" color="success">
+              Approve Request
+            </Button>
+          </Stack>
+        )}    
 
       </Stack>
     </Card>

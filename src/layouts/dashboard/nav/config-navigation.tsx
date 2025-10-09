@@ -53,6 +53,18 @@ const navConfig = [
     items: [
 
 
+
+      // USER
+      {
+        title: 'Users',
+        path: PATH_DASHBOARD.client.list,
+        icon: ICONS.user,
+        children: [ 
+          { title: 'list', path: PATH_DASHBOARD.client.list },
+          { title: 'create', path: PATH_DASHBOARD.client.create },
+        ],
+      },
+
       // LOAN
       {
         title: 'Loans',
@@ -72,18 +84,29 @@ const navConfig = [
            
         ],
       },
-      
 
-      // USER
+       // BILLS
       {
-        title: 'Users',
-        path: PATH_DASHBOARD.client.list,
-        icon: ICONS.user,
-        children: [ 
-          { title: 'list', path: PATH_DASHBOARD.client.list },
-          { title: 'create', path: PATH_DASHBOARD.client.create },
+        title: 'Bills',
+        path: PATH_DASHBOARD.accounting.view,
+        icon: ICONS.cart,
+        children: [
+          { title: 'Airtime', path: PATH_DASHBOARD.accounting.view },
+          { title: 'Internet', path: PATH_DASHBOARD.accounting.journal },
+          { title: 'Cable TV', path: PATH_DASHBOARD.accounting.journal },
+          { title: 'Electricity', path: PATH_DASHBOARD.accounting.journal },
         ],
       },
+       {
+        title: 'Fund Transfer',
+        path: PATH_DASHBOARD.accounting.view,
+        icon: ICONS.banking,
+        children: [
+          { title: 'Bank Transfer', path: PATH_DASHBOARD.accounting.view },
+          { title: 'User Transfer', path: PATH_DASHBOARD.accounting.journal },
+        ],
+      },
+      
       // INVOICE
       /*
       {
@@ -95,7 +118,6 @@ const navConfig = [
           { title: 'Journals Of Account', path: PATH_DASHBOARD.accounting.journal },
         ],
       },
-      */
 
       // Branches
       {
@@ -140,8 +162,7 @@ const navConfig = [
           { title: 'Manage Income Type', path: '' },
            
         ],
-      },
-      */
+      }, 
 
 
       // REPORT

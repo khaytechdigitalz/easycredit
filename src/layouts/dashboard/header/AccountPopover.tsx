@@ -85,15 +85,15 @@ export default function AccountPopover() {
           }),
         }}
       >
-        <CustomAvatar src={user?.photoURL} alt={user?.displayName} name={user?.displayName} />
+        <CustomAvatar src='https://placehold.co/600x400/EEE/31343C?font=oswald&text=Admin' alt={user?.displayName} name={user?.displayName} />
       </IconButtonAnimate>
 
       <MenuPopover open={openPopover} onClose={handleClosePopover} sx={{ width: 200, p: 0 }}>
         <Box sx={{ my: 1.5, px: 2.5 }}>
           <Typography variant="subtitle2" noWrap>
-            {user?.displayName}
+            Admin
           </Typography>
-
+          
           <Typography variant="body2" sx={{ color: 'text.secondary' }} noWrap>
             {user?.email}
           </Typography>

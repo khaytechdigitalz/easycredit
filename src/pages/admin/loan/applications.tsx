@@ -11,6 +11,7 @@ import {
   Tooltip,
   TableBody,
   Container,
+  Grid,
   IconButton,
   TableContainer,
 } from '@mui/material';
@@ -43,6 +44,14 @@ import CustomBreadcrumbs from '../../../components/custom-breadcrumbs';
 // sections
 import { ProductTableRow, ProductTableToolbar } from '../../../sections/@dashboard/loans/list';
 
+
+import { 
+  BookingWidgetSummary, 
+} from '../../../sections/@dashboard/loans/stat';
+// assets
+import {
+  BookingIllustration, 
+} from '../../../assets/illustrations';
 // ----------------------------------------------------------------------
 
 const TABLE_HEAD = [
@@ -132,6 +141,31 @@ export default function EcommerceProductListPage() {
     }
   }, [loanlog]);
 
+
+  const [loanstat, setDashstat] = useState<any>(null);
+
+  useEffect(() => {
+    const fetchLoanData = async () => {
+      try {
+        const accessToken = localStorage.getItem('accessToken');
+        const config = {
+          headers: {
+            'Authorization': `Bearer ${accessToken}`
+          }
+        }; 
+
+        const loansStat = await axios.get('/admin/loans/stats', config);
+        setDashstat(loansStat.data.data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchLoanData();
+  }, []);
+ 
+  useEffect(() => {}, [loanstat]);
+
   const dataFiltered = applyFilter({
     inputData: tableData,
     comparator: getComparator(order, orderBy),
@@ -190,8 +224,39 @@ export default function EcommerceProductListPage() {
             { name: 'Loan Applications' },
           ]}
         />
+        
+        <Grid container spacing={3}>
+
+            <Grid item xs={12} md={4}>
+              <BookingWidgetSummary image="/assets/icons/payments/loanicon.webp" title="Awaiting Disbursement" total={loanstat?.awaitingDisbursement ? loanstat.awaitingDisbursement : '0'} icon={<BookingIllustration />} />
+            </Grid>
+
+            <Grid item xs={12} md={4}>
+              <BookingWidgetSummary image="/assets/icons/payments/loanicon.webp" title="Pending Approval" total={loanstat?.pendingApproval ? loanstat.pendingApproval : '0'} icon={<BookingIllustration />} />
+            </Grid>
+
+            <Grid item xs={12} md={4}>
+              <BookingWidgetSummary image="/assets/icons/payments/loanicon.webp" title="Rejected" total={loanstat?.rejected ? loanstat.rejected : '0'} icon={<BookingIllustration />} />
+            </Grid>
+
+            <Grid item xs={12} md={4}>
+              <BookingWidgetSummary image="/assets/icons/payments/loanicon.webp" title="Closed" total={loanstat?.closed ? loanstat.closed : '0'} icon={<BookingIllustration />} />
+            </Grid>
+
+            <Grid item xs={12} md={4}>
+              <BookingWidgetSummary image="/assets/icons/payments/loanicon.webp" title="Active" total={loanstat?.active ? loanstat.active : '0'} icon={<BookingIllustration />} />
+            </Grid>
+
+            <Grid item xs={12} md={4}>
+              <BookingWidgetSummary image="/assets/icons/payments/loanicon.webp" title="Check Out" total={loanstat?.defaulted ? loanstat.defaulted : '0'} icon={<BookingIllustration />} />
+            </Grid>
+        </Grid>
+          <br/>
 
         <Card>
+
+          
+
           <ProductTableToolbar
             filterName={filterName}
             filterStatus={filterStatus}

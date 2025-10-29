@@ -87,23 +87,25 @@ const navConfig = [
 
        // BILLS
       {
-        title: 'Bills',
-        path: PATH_DASHBOARD.accounting.view,
+        title: 'Bills Payment',
+        path: PATH_DASHBOARD.bills.root,
         icon: ICONS.cart,
         children: [
-          { title: 'Airtime', path: PATH_DASHBOARD.accounting.view },
-          { title: 'Internet', path: PATH_DASHBOARD.accounting.journal },
-          { title: 'Cable TV', path: PATH_DASHBOARD.accounting.journal },
-          { title: 'Electricity', path: PATH_DASHBOARD.accounting.journal },
+          { title: 'All', path: PATH_DASHBOARD.bills.history+'?type=' },
+          { title: 'Airtime', path: PATH_DASHBOARD.bills.history+'?type=airtime' },
+          { title: 'Internet', path: PATH_DASHBOARD.bills.history+'?type=data' },
+          { title: 'Cable TV', path: PATH_DASHBOARD.bills.history+'?type=tv' },
+          { title: 'Electricity', path: PATH_DASHBOARD.bills.history+'?type=electricity' },
         ],
       },
+      
        {
         title: 'Fund Transfer',
-        path: PATH_DASHBOARD.accounting.view,
+        path: PATH_DASHBOARD.transfer.root,
         icon: ICONS.banking,
         children: [
-          { title: 'Bank Transfer', path: PATH_DASHBOARD.accounting.view },
-          { title: 'User Transfer', path: PATH_DASHBOARD.accounting.journal },
+          { title: 'Bank Transfer', path: PATH_DASHBOARD.transfer.bank },
+          { title: 'User Transfer', path: PATH_DASHBOARD.transfer.user },
         ],
       },
       

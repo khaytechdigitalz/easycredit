@@ -96,7 +96,7 @@ export default function LoanStat({
         </Stack>
         <Stack direction="row" justifyContent="space-between">
           <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-            Loan Term
+            Repayment Cycle
           </Typography>
           <Typography variant="body2">{statistics?.term} Days</Typography>
         </Stack>

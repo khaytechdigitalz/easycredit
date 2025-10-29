@@ -58,6 +58,16 @@ export const PATH_DASHBOARD = {
     journal: path(ROOTS_ADMIN, '/accounting/journal_entry'),
   },
 
+  bills: {
+    root: path(ROOTS_DASHBOARD, '/bills'),
+    history: path(ROOTS_ADMIN, '/bills/history'),
+  },
+  transfer: {
+    root: path(ROOTS_DASHBOARD, '/transfer'),
+    bank: path(ROOTS_ADMIN, '/transfer/bank'),
+    user: path(ROOTS_ADMIN, '/transfer/user'),
+  },
+
   loan: {
     root: path(ROOTS_DASHBOARD, '/loan'),
     applications: path(ROOTS_ADMIN, '/loan/applications'),

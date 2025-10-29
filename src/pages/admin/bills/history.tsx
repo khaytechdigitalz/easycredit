@@ -42,12 +42,12 @@ import Iconify from '../../../components/iconify';
 import Scrollbar from '../../../components/scrollbar';
 import CustomBreadcrumbs from '../../../components/custom-breadcrumbs';
 // sections
-import { ProductTableRow, ProductTableToolbar } from '../../../sections/@dashboard/loans/list';
+import { ProductTableRow, ProductTableToolbar } from '../../../sections/@dashboard/bills/list';
 
 
 import { 
   BookingWidgetSummary, 
-} from '../../../sections/@dashboard/loans/stat';
+} from '../../../sections/@dashboard/bills/stat';
 // assets
 import {
   BookingIllustration, 
@@ -56,30 +56,29 @@ import {
 
 const TABLE_HEAD = [
   { id: 'name', label: 'Date', align: 'left' }, 
-  { id: 'name', label: 'Loan ID', align: 'left' },
   { id: 'name', label: 'User ID', align: 'left' },
+  { id: 'name', label: 'Bill ID', align: 'left' },
+  { id: 'name', label: 'Service Type', align: 'left' },
+  { id: 'name', label: 'Recipient', align: 'left' },
+  { id: 'name', label: 'Provider', align: 'left' },
   { id: 'name', label: 'Amount', align: 'left' },
-  { id: 'name', label: 'Repayment Cycle', align: 'left' },
-  { id: 'name', label: 'Purpose', align: 'left' },
-  { id: 'name', label: 'Interest Rate', align: 'left' },
   { id: 'name', label: 'Status', align: 'left' },
-  { id: '' },
 ];
 
 const STATUS_OPTIONS = [
-  { value: 'paid', label: 'Paid' },
-  { value: 'pending', label: 'Pending' },
+  { value: 'success', label: 'Successful' },
+  { value: 'failed', label: 'Failed' },
 ];
 
 // ----------------------------------------------------------------------
 
-LoanListPage.getLayout = (page: React.ReactElement) => (
+BillsPage.getLayout = (page: React.ReactElement) => (
   <DashboardLayout>{page}</DashboardLayout>
 );
 
 // ----------------------------------------------------------------------
 
-export default function LoanListPage() {
+export default function BillsPage() {
   const {
     dense,
     page,
@@ -112,8 +111,15 @@ export default function LoanListPage() {
 
   const [filterStatus, setFilterStatus] = useState<string[]>([]);
 
+  // 1. Get the query string: "?type=airtime"
+  const queryString = window.location.search;
 
-  const [loanlog, setDashlog] = useState<any>(null);
+  // 2. Create a URLSearchParams object
+  const params = new URLSearchParams(queryString);
+
+  // 3. Use the get() method
+  let typeValue = params.get('type');
+  const [responselog, setDashlog] = useState<any>(null);
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -124,9 +130,9 @@ export default function LoanListPage() {
             'Authorization': `Bearer ${accessToken}`
           }
         }; 
+        const apiResponse = await axios.get('/admin/bill/history/'+typeValue, config);
 
-        const loansResponse = await axios.get('/admin-dashboard/d/recent-loans', config);
-        setDashlog(loansResponse.data);
+        setDashlog(apiResponse.data);
       } catch (error) {
         console.error(error);
       }
@@ -136,43 +142,30 @@ export default function LoanListPage() {
   }, []);
  
   useEffect(() => {
-    if (loanlog?.length) {
-      setTableData(loanlog);
+  const dataFromApi = responselog?.data.data;
+  if (typeof dataFromApi === 'object' && dataFromApi !== null && !Array.isArray(dataFromApi)) {
+      const dataAsArray = Object.values(dataFromApi);
+
+     if (dataAsArray.length > 0) {
+       setTableData(dataAsArray);
     }
-  }, [loanlog]);
+
+  } else if (Array.isArray(dataFromApi)) {
+    console.info("Data was already an array:", dataFromApi);
+    if (dataFromApi.length > 0) {
+        setTableData(dataFromApi);
+    }
+  }
+}, [responselog]);
 
 
-  const [loanstat, setDashstat] = useState<any>(null);
-
-  useEffect(() => {
-    const fetchLoanData = async () => {
-      try {
-        const accessToken = localStorage.getItem('accessToken');
-        const config = {
-          headers: {
-            'Authorization': `Bearer ${accessToken}`
-          }
-        }; 
-
-        const loansStat = await axios.get('/admin/loans/stats', config);
-        setDashstat(loansStat.data.data);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
-    fetchLoanData();
-  }, []);
- 
-  useEffect(() => {}, [loanstat]);
-
+  
   const dataFiltered = applyFilter({
     inputData: tableData,
     comparator: getComparator(order, orderBy),
     filterName,
     filterStatus,
   });
-
 
   const denseHeight = dense ? 60 : 80;
 
@@ -196,10 +189,7 @@ export default function LoanListPage() {
     setFilterStatus(typeof value === 'string' ? value.split(',') : value);
   };
   
-
-  const handleViewRow = (id: string) => {
-    push(PATH_DASHBOARD.loan.view(paramCase(id)));
-  };
+ 
 
   const handleResetFilter = () => {
     setFilterName('');
@@ -209,47 +199,28 @@ export default function LoanListPage() {
   return (
     <>
       <Head>
-        <title> Loan: Loan Applications | Easy Credit</title>
+        <title> Bills: Bills Payment Log | Easy Credit</title>
       </Head>
 
       <Container maxWidth={themeStretch ? false : 'xl'}>
         <CustomBreadcrumbs
-          heading="Loan Applications"
+          heading="Bills Payment Log"
           links={[
             { name: 'Dashboard', href: PATH_DASHBOARD.root },
             {
-              name: 'Loan',
+              name: 'Bills',
               href: '',
             },
-            { name: 'Loan Applications' },
+            { name: 'Payment Log' },
           ]}
         />
         
         <Grid container spacing={3}>
 
-            <Grid item xs={12} md={4}>
-              <BookingWidgetSummary image="/assets/icons/payments/loanicon.webp" title="Awaiting Disbursement" total={loanstat?.awaitingDisbursement ? loanstat.awaitingDisbursement : '0'} icon={<BookingIllustration />} />
+            <Grid item xs={12} md={12}>
+              <BookingWidgetSummary image="/assets/icons/payments/cart.png" title="Total Bills Payment" total={responselog?.data ? responselog.data.total : '0'} icon={<BookingIllustration />} />
             </Grid>
-
-            <Grid item xs={12} md={4}>
-              <BookingWidgetSummary image="/assets/icons/payments/loanicon.webp" title="Pending Approval" total={loanstat?.pendingApproval ? loanstat.pendingApproval : '0'} icon={<BookingIllustration />} />
-            </Grid>
-
-            <Grid item xs={12} md={4}>
-              <BookingWidgetSummary image="/assets/icons/payments/loanicon.webp" title="Rejected" total={loanstat?.rejected ? loanstat.rejected : '0'} icon={<BookingIllustration />} />
-            </Grid>
-
-            <Grid item xs={12} md={4}>
-              <BookingWidgetSummary image="/assets/icons/payments/loanicon.webp" title="Closed" total={loanstat?.closed ? loanstat.closed : '0'} icon={<BookingIllustration />} />
-            </Grid>
-
-            <Grid item xs={12} md={4}>
-              <BookingWidgetSummary image="/assets/icons/payments/loanicon.webp" title="Active" total={loanstat?.active ? loanstat.active : '0'} icon={<BookingIllustration />} />
-            </Grid>
-
-            <Grid item xs={12} md={4}>
-              <BookingWidgetSummary image="/assets/icons/payments/loanicon.webp" title="Check Out" total={loanstat?.defaulted ? loanstat.defaulted : '0'} icon={<BookingIllustration />} />
-            </Grid>
+ 
         </Grid>
           <br/>
 
@@ -277,14 +248,7 @@ export default function LoanListPage() {
                   checked,
                   tableData.map((row) => row.id)
                 )
-              }
-              action={
-                <Tooltip title="Delete">
-                  <IconButton color="primary" onClick={handleOpenConfirm}>
-                    <Iconify icon="eva:trash-2-outline" />
-                  </IconButton>
-                </Tooltip>
-              }
+              } 
             />
 
             <Scrollbar>
@@ -308,8 +272,7 @@ export default function LoanListPage() {
                           row={row}
                           selected={selected.includes(row?._id)}
                           onSelectRow={() => onSelectRow(row?._id)}
-                          onViewRow={() => handleViewRow(row?._id)}
-                        />
+                         />
                       ) : (
                         !isNotFound && <TableSkeleton key={index} sx={{ height: denseHeight }} />
                       )

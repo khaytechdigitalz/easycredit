@@ -33,7 +33,7 @@ export default function ProductTableRow({
   onSelectRow,
   onViewRow,
 }: Props) {
-  const { _id, userId, purpose,interestRate, term, status,amount, applicationDate } = row;
+  const { _id, userId, billId,serviceType, recipient,providerType, status,amount, createdAt } = row;
 
 
   const [openPopover, setOpenPopover] = useState<HTMLElement | null>(null);
@@ -52,25 +52,25 @@ export default function ProductTableRow({
 
         <TableCell>
           <Stack direction="row" alignItems="left" spacing={2}>
-              {fDate(applicationDate)} 
+              {fDate(createdAt)} 
           </Stack>
         </TableCell>
         <TableCell>
           <Stack direction="row" alignItems="left" spacing={2}>
-              {_id} 
+              {userId} 
           </Stack>
         </TableCell>
 
-        <TableCell align="left">{userId}</TableCell>
-        <TableCell align="left">₦{fCurrency(amount)}</TableCell>
-        <TableCell align="left">{term} Days</TableCell>
-        <TableCell align="left">{purpose}</TableCell>
-        <TableCell align="left">{interestRate}%</TableCell>
+        <TableCell align="left">{billId}</TableCell>
+        <TableCell align="left">{serviceType}</TableCell>
+        <TableCell align="left">{recipient}</TableCell>
+        <TableCell align="left">{providerType}</TableCell> 
+        <TableCell align="left">₦{fCurrency(amount)}</TableCell> 
         <TableCell align="left">
           <Label
             variant="soft"
             color={
-              (status === 'paid' && 'success') ||
+              (status === 'success' && 'success') ||
               (status === 'pending' && 'warning') ||
               'error'
             }
@@ -78,32 +78,10 @@ export default function ProductTableRow({
           >
             {status ? sentenceCase(status) : ''}
           </Label>
-        </TableCell>
-        <TableCell align="right">
-          <IconButton color={openPopover ? 'primary' : 'default'} onClick={handleOpenPopover}>
-            <Iconify icon="eva:more-vertical-fill" />
-          </IconButton>
-        </TableCell>
+        </TableCell> 
       </TableRow>
 
-      <MenuPopover
-        open={openPopover}
-        onClose={handleClosePopover}
-        arrow="right-top"
-        sx={{ width: 140 }}
-      >
-        
-
-        <MenuItem
-          onClick={() => {
-            onViewRow();
-            handleClosePopover();
-          }}
-        >
-          <Iconify icon="eva:eye-fill" />
-          View Details
-        </MenuItem>
-      </MenuPopover>
+       
  
     </>
   );

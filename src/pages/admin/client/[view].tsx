@@ -17,7 +17,6 @@ import {
   AccountBilling,
   AccountLoans,
   AccountBills,
-  AccountTransfer,
   AccountChangePassword,
 } from '../../../sections/@dashboard/users/account';
 
@@ -60,17 +59,10 @@ export default function UserAccountPage() {
 
     {
       value: 'bills',
-      label: 'Bills',
+      label: 'Payments',
       icon: <Iconify icon="ic:round-shopping-cart" />,
       component: <AccountBills />,
-    },
-
-    {
-      value: 'transfer',
-      label: 'Tranfer',
-      icon: <Iconify icon="ic:round-money" />,
-      component: <AccountTransfer />,
-    },
+    }, 
     
     {
       value: 'change_password',

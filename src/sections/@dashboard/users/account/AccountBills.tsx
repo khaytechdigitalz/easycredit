@@ -29,20 +29,17 @@ import {
 import Scrollbar from '../../../../components/scrollbar';
 
 // ----------------------------------------------------------------------
- import { ProductTableRow, ProductTableToolbar } from '../../bills/list';
+ import { ProductTableRow, ProductTableToolbar } from '../../bills/user';
 // ----------------------------------------------------------------------
 
  
 const TABLE_HEAD = [
   { id: 'name', label: 'Date', align: 'left' }, 
-  { id: 'name', label: 'User ID', align: 'left' },
-  { id: 'name', label: 'Bill ID', align: 'left' },
-  { id: 'name', label: 'Service Type', align: 'left' },
-  { id: 'name', label: 'Recipient', align: 'left' },
   { id: 'name', label: 'Provider', align: 'left' },
+  { id: 'name', label: 'Service Type', align: 'left' },
+  { id: 'name', label: 'Recipient', align: 'left' }, 
   { id: 'name', label: 'Amount', align: 'left' },
   { id: 'name', label: 'Status', align: 'left' },
-  { id: '' },
 ];
 
 const STATUS_OPTIONS = [
@@ -83,7 +80,7 @@ const {
   const [filterStatus, setFilterStatus] = useState<string[]>([]);
 
 
-  const [loanlog, setDashlog] = useState<any>(null);
+  const [responselog, setDashlog] = useState<any>(null);
 
  const urlPath = window.location.pathname;
   const id = urlPath.split('/').filter(Boolean).pop(); 
@@ -109,10 +106,22 @@ const {
  
 
   useEffect(() => {
-    if (loanlog?.length) {
-      setTableData(loanlog);
+  const dataFromApi = responselog?.data.data;
+  if (typeof dataFromApi === 'object' && dataFromApi !== null && !Array.isArray(dataFromApi)) {
+      const dataAsArray = Object.values(dataFromApi);
+
+     if (dataAsArray.length > 0) {
+       setTableData(dataAsArray);
     }
-  }, [loanlog]);
+
+  } else if (Array.isArray(dataFromApi)) {
+    console.info("Data was already an array:", dataFromApi);
+    if (dataFromApi.length > 0) {
+        setTableData(dataFromApi);
+    }
+  }
+}, [responselog]);
+ 
 
   const dataFiltered = applyFilter({
     inputData: tableData,
@@ -148,7 +157,7 @@ const {
   return (
        <Card sx={{ p: 3 }}>
         <Typography variant="overline" component="div" sx={{ color: 'text.secondary' }}>
-          Bills History
+          Payment History
         </Typography>
 
           <ProductTableToolbar
@@ -171,13 +180,7 @@ const {
                   headLabel={TABLE_HEAD}
                   rowCount={tableData.length}
                   numSelected={selected.length}
-                  onSort={onSort}
-                  onSelectAllRows={(checked) =>
-                    onSelectAllRows(
-                      checked,
-                      tableData.map((row) => row._id)
-                    )
-                  }
+                  onSort={onSort} 
                 />
 
                 <TableBody>

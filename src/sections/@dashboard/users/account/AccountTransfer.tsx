@@ -107,23 +107,12 @@ const {
     fetchDashboardData();
   }, [id]);
  
+
   useEffect(() => {
-  const dataFromApi = loanlog?.data.data;
-  if (typeof dataFromApi === 'object' && dataFromApi !== null && !Array.isArray(dataFromApi)) {
-      const dataAsArray = Object.values(dataFromApi);
-
-     if (dataAsArray.length > 0) {
-       setTableData(dataAsArray);
+    if (loanlog?.length) {
+      setTableData(loanlog);
     }
-
-  } else if (Array.isArray(dataFromApi)) {
-    console.info("Data was already an array:", dataFromApi);
-    if (dataFromApi.length > 0) {
-        setTableData(dataFromApi);
-    }
-  }
-}, [loanlog]);
-
+  }, [loanlog]);
 
   const dataFiltered = applyFilter({
     inputData: tableData,

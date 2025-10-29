@@ -178,19 +178,19 @@ export default function EcommerceProductListPage() {
   return (
     <>
       <Head>
-        <title> Users: Manage Users | Easy Credit</title>
+        <title> Customers: Manage Customers | Easy Credit</title>
       </Head>
 
       <Container maxWidth={themeStretch ? false : 'xl'}>
         <CustomBreadcrumbs
-          heading="Manage Users"
+          heading="Manage Customers"
           links={[
             { name: 'Dashboard', href: PATH_DASHBOARD.root },
             {
-              name: 'Users',
+              name: 'Customers',
               href: '',
             },
-            { name: 'Manage Users' },
+            { name: 'Manage Customers' },
           ]}
         />
 

@@ -29,19 +29,19 @@ import {
 import Scrollbar from '../../../../components/scrollbar';
 
 // ----------------------------------------------------------------------
- import { ProductTableRow, ProductTableToolbar } from '../../loans/list';
+ import { ProductTableRow, ProductTableToolbar } from '../../bills/list';
 // ----------------------------------------------------------------------
 
  
 const TABLE_HEAD = [
-  { id: 'name', label: 'ID', align: 'left' },
-  { id: 'name', label: 'User ID', align: 'left' },
-  { id: 'name', label: 'Amount', align: 'left' },
-  { id: 'name', label: 'Term', align: 'left' },
-  { id: 'name', label: 'Purpose', align: 'left' },
-  { id: 'name', label: 'Interest Rate', align: 'left' },
-  { id: 'name', label: 'Status', align: 'left' },
   { id: 'name', label: 'Date', align: 'left' }, 
+  { id: 'name', label: 'User ID', align: 'left' },
+  { id: 'name', label: 'Bill ID', align: 'left' },
+  { id: 'name', label: 'Service Type', align: 'left' },
+  { id: 'name', label: 'Recipient', align: 'left' },
+  { id: 'name', label: 'Provider', align: 'left' },
+  { id: 'name', label: 'Amount', align: 'left' },
+  { id: 'name', label: 'Status', align: 'left' },
   { id: '' },
 ];
 
@@ -97,7 +97,7 @@ const {
             'Authorization': `Bearer ${accessToken}`
           }
         }; 
-        const loansResponse = await axios.get(`/admin/users/${id}/loans`, config);
+        const loansResponse = await axios.get(`/admin/users/${id}/bills`, config);
         setDashlog(loansResponse.data);
       } catch (error) {
         console.error(error);
@@ -107,23 +107,12 @@ const {
     fetchDashboardData();
   }, [id]);
  
+
   useEffect(() => {
-  const dataFromApi = loanlog?.data.data;
-  if (typeof dataFromApi === 'object' && dataFromApi !== null && !Array.isArray(dataFromApi)) {
-      const dataAsArray = Object.values(dataFromApi);
-
-     if (dataAsArray.length > 0) {
-       setTableData(dataAsArray);
+    if (loanlog?.length) {
+      setTableData(loanlog);
     }
-
-  } else if (Array.isArray(dataFromApi)) {
-    console.info("Data was already an array:", dataFromApi);
-    if (dataFromApi.length > 0) {
-        setTableData(dataFromApi);
-    }
-  }
-}, [loanlog]);
-
+  }, [loanlog]);
 
   const dataFiltered = applyFilter({
     inputData: tableData,
@@ -159,7 +148,7 @@ const {
   return (
        <Card sx={{ p: 3 }}>
         <Typography variant="overline" component="div" sx={{ color: 'text.secondary' }}>
-          Loan History
+          Bills History
         </Typography>
 
           <ProductTableToolbar

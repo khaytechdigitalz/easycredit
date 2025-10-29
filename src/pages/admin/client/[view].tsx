@@ -16,6 +16,8 @@ import {
   AccountGeneral,
   AccountBilling,
   AccountLoans,
+  AccountBills,
+  AccountTransfer,
   AccountChangePassword,
 } from '../../../sections/@dashboard/users/account';
 
@@ -40,7 +42,7 @@ export default function UserAccountPage() {
     {
       value: 'billing',
       label: 'Wallet',
-      icon: <Iconify icon="ic:round-receipt" />,
+      icon: <Iconify icon="ic:round-wallet" />,
       component: (
         <AccountBilling
           cards={[]}
@@ -52,8 +54,22 @@ export default function UserAccountPage() {
     {
       value: 'loan',
       label: 'Loans',
-      icon: <Iconify icon="ic:round-receipt" />,
+      icon: <Iconify icon="ic:round-money" />,
       component: <AccountLoans />,
+    },
+
+    {
+      value: 'bills',
+      label: 'Bills',
+      icon: <Iconify icon="ic:round-shopping-cart" />,
+      component: <AccountBills />,
+    },
+
+    {
+      value: 'transfer',
+      label: 'Tranfer',
+      icon: <Iconify icon="ic:round-money" />,
+      component: <AccountTransfer />,
     },
     
     {
@@ -67,16 +83,16 @@ export default function UserAccountPage() {
   return (
     <>
       <Head>
-        <title> User: Account Settings | Minimal UI</title>
+        <title> User: Customers Details | EasyCredit</title>
       </Head>
 
       <Container maxWidth={themeStretch ? false : 'xl'}>
         <CustomBreadcrumbs
-          heading="Account"
+          heading="Customer Details"
           links={[
             { name: 'Dashboard', href: PATH_DASHBOARD.root },
-            { name: 'User', href: PATH_DASHBOARD.user.root },
-            { name: 'Account Settings' },
+            { name: 'Customers', href: PATH_DASHBOARD.user.root },
+            { name: 'Details' },
           ]}
         />
 

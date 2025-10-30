@@ -19,7 +19,6 @@ import { CustomFile } from '../../../../components/upload';
 import { useSnackbar } from '../../../../components/snackbar';
 import FormProvider, {
   RHFSwitch,
-  RHFSelect,
   RHFTextField,
   RHFUploadAvatar,
 } from '../../../../components/hook-form';

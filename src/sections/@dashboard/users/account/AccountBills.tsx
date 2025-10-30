@@ -57,7 +57,6 @@ const {
     //
     selected,
     onSelectRow,
-    onSelectAllRows,
     //
     onSort,
     onChangeDense,

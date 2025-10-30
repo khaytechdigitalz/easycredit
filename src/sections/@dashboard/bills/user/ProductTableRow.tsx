@@ -4,9 +4,7 @@ import { sentenceCase } from 'change-case';
 import {
   Stack,
   TableRow,
-  MenuItem,
   TableCell,
-  IconButton,
 } from '@mui/material';
 // utils
 import { fDate } from '../../../../utils/formatTime';
@@ -15,8 +13,6 @@ import { fCurrency } from '../../../../utils/formatNumber';
 import { IProduct } from '../../../../@types/product';
 // components
 import Label from '../../../../components/label';
-import Iconify from '../../../../components/iconify';
-import MenuPopover from '../../../../components/menu-popover';
 
 // ----------------------------------------------------------------------
 
@@ -33,19 +29,11 @@ export default function ProductTableRow({
   onSelectRow,
   onViewRow,
 }: Props) {
-  const { _id, userId, billId,serviceType, recipient,providerType, status,amount, createdAt } = row;
+  const {serviceType, recipient,providerType, status,amount, createdAt } = row;
 
 
   const [openPopover, setOpenPopover] = useState<HTMLElement | null>(null);
-  
-  const handleOpenPopover = (event: React.MouseEvent<HTMLElement>) => {
-    setOpenPopover(event.currentTarget);
-  };
-
-  const handleClosePopover = () => {
-    setOpenPopover(null);
-  };
-
+    
   return (
     <>
       <TableRow hover selected={selected}> 

@@ -1,4 +1,3 @@
-import { ApexOptions } from 'apexcharts';
 // @mui
 import { Box, Card, Typography, CardProps } from '@mui/material';
 // utils

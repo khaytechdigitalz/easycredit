@@ -29,6 +29,8 @@ interface IProduct {
   amount: number;
   createdAt: string;
 }
+// ... (imports and types remain the same)
+
 export default function ProductTableRow({
   row,
   selected,
@@ -40,7 +42,7 @@ export default function ProductTableRow({
    
 
   return (
-    <>
+    // REMOVE THE FRAGMENT TAGS HERE
       <TableRow hover selected={selected}> 
 
         <TableCell>
@@ -74,8 +76,6 @@ export default function ProductTableRow({
         </TableCell> 
       </TableRow>
 
-       
- 
-    </>
+    // AND REMOVE THE CLOSING FRAGMENT TAG HERE
   );
 }

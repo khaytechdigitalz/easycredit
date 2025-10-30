@@ -3,10 +3,13 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 
 // @mui
-import { Card, Typography,
+import { 
+  Card, Typography,
   Table,
   TableBody,
-  TableContainer, } from '@mui/material';
+  TableContainer, 
+  SelectChangeEvent, // Assuming SelectChangeEvent is needed for toolbar status filter
+} from '@mui/material';
 // @types
 import axios from '../../../../utils/axios';
 import { useSelector } from '../../../../redux/store';
@@ -15,7 +18,6 @@ import { IProduct } from '../../../../@types/product';
 import { PATH_DASHBOARD } from '../../../../routes/paths';
 
 // components 
-
 import {
   useTable,
   getComparator,
@@ -32,23 +34,24 @@ import Scrollbar from '../../../../components/scrollbar';
  import { ProductTableRow, ProductTableToolbar } from '../../loans/list';
 // ----------------------------------------------------------------------
 
- 
+// FIX: Corrected 'id' fields to match potential loan data properties for sorting
 const TABLE_HEAD = [
-  { id: 'name', label: 'ID', align: 'left' },
-  { id: 'name', label: 'User ID', align: 'left' },
-  { id: 'name', label: 'Amount', align: 'left' },
-  { id: 'name', label: 'Term', align: 'left' },
-  { id: 'name', label: 'Purpose', align: 'left' },
-  { id: 'name', label: 'Interest Rate', align: 'left' },
-  { id: 'name', label: 'Status', align: 'left' },
-  { id: 'name', label: 'Date', align: 'left' }, 
-  { id: '' },
+  { id: '_id', label: 'ID', align: 'left' }, // Should be '_id' for sorting by ID
+  { id: 'userId', label: 'User ID', align: 'left' }, 
+  { id: 'amount', label: 'Amount', align: 'left' },
+  { id: 'term', label: 'Term', align: 'left' },
+  { id: 'purpose', label: 'Purpose', align: 'left' },
+  { id: 'interestRate', label: 'Interest Rate', align: 'left' },
+  { id: 'status', label: 'Status', align: 'left' },
+  { id: 'createdAt', label: 'Date', align: 'left' }, 
+  { id: '' }, // Placeholder for actions/menu, which should not have an ID for sorting
 ];
 
 const STATUS_OPTIONS = [
   { value: 'paid', label: 'Paid' },
   { value: 'pending', label: 'Pending' },
 ];
+
 export default function AccountNotifications() {
 const {
     dense,
@@ -85,7 +88,7 @@ const {
 
   const [loanlog, setDashlog] = useState<any>(null);
 
- const urlPath = window.location.pathname;
+  const urlPath = window.location.pathname;
   const id = urlPath.split('/').filter(Boolean).pop(); 
   
   useEffect(() => {
@@ -108,18 +111,43 @@ const {
   }, [id]);
  
   useEffect(() => {
-  const dataFromApi = loanlog?.data.data;
+  const dataFromApi = loanlog?.data?.data;
   if (typeof dataFromApi === 'object' && dataFromApi !== null && !Array.isArray(dataFromApi)) {
-      const dataAsArray = Object.values(dataFromApi);
+    const dataAsArray = Object.values(dataFromApi);
 
-     if (dataAsArray.length > 0) {
-       setTableData(dataAsArray);
+    // Validate and type-assert the data
+    if (dataAsArray.length > 0) {
+      // Type guard to validate the array items match IProduct structure
+      const isValidProductArray = dataAsArray.every(item => 
+        item && 
+        typeof item === 'object' && 
+        '_id' in item // Add checks for required IProduct properties
+      );
+      
+      if (isValidProductArray) {
+        setTableData(dataAsArray as IProduct[]);
+      } else {
+        console.error('Data does not match IProduct structure:', dataAsArray);
+        // Handle invalid data - maybe set an empty array or default values
+        setTableData([]);
+      }
     }
-
   } else if (Array.isArray(dataFromApi)) {
     console.info("Data was already an array:", dataFromApi);
     if (dataFromApi.length > 0) {
-        setTableData(dataFromApi);
+      // Same validation before setting
+      const isValidProductArray = dataFromApi.every(item => 
+        item && 
+        typeof item === 'object' && 
+        '_id' in item // Add checks for required IProduct properties
+      );
+      
+      if (isValidProductArray) {
+        setTableData(dataFromApi as IProduct[]);
+      } else {
+        console.error('Data does not match IProduct structure:', dataFromApi);
+        setTableData([]);
+      }
     }
   }
 }, [loanlog]);
@@ -145,6 +173,16 @@ const {
     setFilterName(event.target.value);
   };
  
+  // FIX: Added the missing handler with the correct SelectChangeEvent type
+  const handleFilterStatus = (event: SelectChangeEvent<string[]>) => {
+    setPage(0);
+    
+    const { value } = event.target;
+    
+    // MUI SelectChangeEvent<string[]> is used, so value is typically string[]
+    setFilterStatus(typeof value === 'string' ? [value] : value);
+  };
+
   const handleViewRow = (_id: string) => {
     push(PATH_DASHBOARD.eCommerce.view(paramCase(_id)));
   };
@@ -166,6 +204,7 @@ const {
             filterName={filterName}
             filterStatus={filterStatus}
             onFilterName={handleFilterName}
+            onFilterStatus={handleFilterStatus} // FIX: Pass the corrected handler
             statusOptions={STATUS_OPTIONS}
             isFiltered={isFiltered}
             onResetFilter={handleResetFilter}
@@ -201,7 +240,7 @@ const {
                           row={row}
                           selected={selected.includes(row._id)}
                           onSelectRow={() => onSelectRow(row._id)}
-                          onViewRow={() => handleViewRow(row.name)}
+                          onViewRow={() => handleViewRow(row._id)} // FIX: Use row._id here
                         />
                       ) : (
                         !isNotFound && <TableSkeleton key={index} sx={{ height: denseHeight }} />
@@ -233,6 +272,7 @@ const {
   );
 }
 
+// FIX: Updated applyFilter to use relevant loan data properties
 function applyFilter({
   inputData,
   comparator,
@@ -255,15 +295,19 @@ function applyFilter({
   inputData = stabilizedThis.map((el) => el[0]);
 
   if (filterName) {
+    // Filter by fields relevant to loans, like user ID, purpose, or loan ID
     inputData = inputData.filter(
-      (product) => product.userId.toLowerCase().indexOf(filterName.toLowerCase()) !== -1
+      (product) => 
+        product.userId.toLowerCase().includes(filterName.toLowerCase()) ||
+        product._id.toLowerCase().includes(filterName.toLowerCase()) || // Assuming _id is a string
+        product.purpose.toLowerCase().includes(filterName.toLowerCase()) // Assuming 'purpose' exists on IProduct
     );
   }
 
   if (filterStatus.length) {
-    inputData = inputData.filter((product) => filterStatus.includes(product.inventoryType));
+    // Filter by the 'status' property
+    inputData = inputData.filter((product) => filterStatus.includes(product.status));
   }
 
   return inputData;
 }
-

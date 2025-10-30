@@ -124,6 +124,7 @@ export default function BillsPage() {
             'Authorization': `Bearer ${accessToken}`
           }
         }; 
+        // typeValue is used here
         const apiResponse = await axios.get(`/admin/bill/history/${typeValue}`, config);
         setDashlog(apiResponse.data);
       } catch (error) {
@@ -132,7 +133,7 @@ export default function BillsPage() {
     };
 
     fetchDashboardData();
-  }, []);
+  }, [typeValue]); // <--- Dependency 'typeValue' added
  
   
   useEffect(() => {
@@ -221,7 +222,9 @@ export default function BillsPage() {
 
       <Container maxWidth={themeStretch ? false : 'xl'}>
         <CustomBreadcrumbs
-          heading="Bills Payment Log"
+          heading={
+            `${typeValue ? `${typeValue.charAt(0).toUpperCase()}${typeValue.slice(1)} ` : ''}Bills Payment Log`
+          }
           links={[
             { name: 'Dashboard', href: PATH_DASHBOARD.root },
             {

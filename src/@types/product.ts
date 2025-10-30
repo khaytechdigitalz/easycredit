@@ -36,6 +36,8 @@ export type IProduct = {
   reviews: IProductReview[];
   colors: string[];
   first_name: string;
+  serviceType: string;
+  recipient: string;
   last_name: string;
   email: string;
   amountDue:string,

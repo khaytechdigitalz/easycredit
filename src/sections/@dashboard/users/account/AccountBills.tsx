@@ -3,10 +3,13 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 
 // @mui
-import { Card, Typography,
+import { 
+  Card, Typography,
   Table,
   TableBody,
-  TableContainer, } from '@mui/material';
+  TableContainer,
+  SelectChangeEvent, // FIX: Import SelectChangeEvent
+} from '@mui/material';
 // @types
 import axios from '../../../../utils/axios';
 import { useSelector } from '../../../../redux/store';
@@ -15,7 +18,6 @@ import { IProduct } from '../../../../@types/product';
 import { PATH_DASHBOARD } from '../../../../routes/paths';
 
 // components 
-
 import {
   useTable,
   getComparator,
@@ -32,20 +34,21 @@ import Scrollbar from '../../../../components/scrollbar';
  import { ProductTableRow, ProductTableToolbar } from '../../bills/user';
 // ----------------------------------------------------------------------
 
- 
+// FIX: Corrected the 'id' fields to match potential data properties for sorting
 const TABLE_HEAD = [
-  { id: 'name', label: 'Date', align: 'left' }, 
-  { id: 'name', label: 'Provider', align: 'left' },
-  { id: 'name', label: 'Service Type', align: 'left' },
-  { id: 'name', label: 'Recipient', align: 'left' }, 
-  { id: 'name', label: 'Amount', align: 'left' },
-  { id: 'name', label: 'Status', align: 'left' },
+  { id: 'createdAt', label: 'Date', align: 'left' }, 
+  { id: 'providerType', label: 'Provider', align: 'left' },
+  { id: 'serviceType', label: 'Service Type', align: 'left' },
+  { id: 'recipient', label: 'Recipient', align: 'left' }, 
+  { id: 'amount', label: 'Amount', align: 'left' },
+  { id: 'status', label: 'Status', align: 'left' },
 ];
 
 const STATUS_OPTIONS = [
-  { value: 'paid', label: 'Paid' },
+  { value: 'success', label: 'Success' },
   { value: 'pending', label: 'Pending' },
 ];
+
 export default function AccountNotifications() {
 const {
     dense,
@@ -81,7 +84,7 @@ const {
 
   const [responselog, setDashlog] = useState<any>(null);
 
- const urlPath = window.location.pathname;
+  const urlPath = window.location.pathname;
   const id = urlPath.split('/').filter(Boolean).pop(); 
   
   useEffect(() => {
@@ -166,7 +169,17 @@ const {
     setPage(0);
     setFilterName(event.target.value);
   };
- 
+
+  // FIX: Added the missing handler with the correct SelectChangeEvent type
+  const handleFilterStatus = (event: SelectChangeEvent<string[]>) => {
+    setPage(0);
+    
+    const { value } = event.target;
+    
+    // MUI SelectChangeEvent<string[]> is used, so value is typically string[]
+    setFilterStatus(typeof value === 'string' ? [value] : value);
+  };
+  
   const handleViewRow = (_id: string) => {
     push(PATH_DASHBOARD.eCommerce.view(paramCase(_id)));
   };
@@ -188,6 +201,7 @@ const {
             filterName={filterName}
             filterStatus={filterStatus}
             onFilterName={handleFilterName}
+            onFilterStatus={handleFilterStatus} // FIX: Pass the corrected handler
             statusOptions={STATUS_OPTIONS}
             isFiltered={isFiltered}
             onResetFilter={handleResetFilter}
@@ -217,7 +231,7 @@ const {
                           row={row}
                           selected={selected.includes(row._id)}
                           onSelectRow={() => onSelectRow(row._id)}
-                          onViewRow={() => handleViewRow(row.name)}
+                          onViewRow={() => handleViewRow(row._id)} // FIX: Use row._id here
                         />
                       ) : (
                         !isNotFound && <TableSkeleton key={index} sx={{ height: denseHeight }} />
@@ -249,6 +263,7 @@ const {
   );
 }
 
+// FIX: Updated applyFilter to use relevant properties for filtering
 function applyFilter({
   inputData,
   comparator,
@@ -271,15 +286,18 @@ function applyFilter({
   inputData = stabilizedThis.map((el) => el[0]);
 
   if (filterName) {
+    // Filter by relevant text fields like serviceType or recipient
     inputData = inputData.filter(
-      (product) => product.userId.toLowerCase().indexOf(filterName.toLowerCase()) !== -1
+      (product) => 
+        product.serviceType.toLowerCase().includes(filterName.toLowerCase()) ||
+        product.recipient.toLowerCase().includes(filterName.toLowerCase())
     );
   }
 
   if (filterStatus.length) {
-    inputData = inputData.filter((product) => filterStatus.includes(product.inventoryType));
+    // Filter by the 'status' property
+    inputData = inputData.filter((product) => filterStatus.includes(product.status));
   }
 
   return inputData;
 }
-

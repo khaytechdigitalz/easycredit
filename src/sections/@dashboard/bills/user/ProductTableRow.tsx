@@ -43,36 +43,32 @@ export default function ProductTableRow({
 
     
   return (
-    <>
-      <TableRow hover selected={selected}> 
+    // FIX: Removed the unnecessary React Fragment (<> and </>)
+    <TableRow hover selected={selected}> 
 
-        <TableCell>
-          <Stack direction="row" alignItems="left" spacing={2}>
-              {fDate(createdAt)} 
-          </Stack>
-        </TableCell> 
+      <TableCell>
+        <Stack direction="row" alignItems="left" spacing={2}>
+            {fDate(createdAt)} 
+        </Stack>
+      </TableCell> 
 
-        <TableCell align="left">{providerType}</TableCell> 
-        <TableCell align="left">{serviceType}</TableCell>
-        <TableCell align="left">{recipient}</TableCell>
-        <TableCell align="left">₦{fCurrency(amount)}</TableCell> 
-        <TableCell align="left">
-          <Label
-            variant="soft"
-            color={
-              (status === 'success' && 'success') ||
-              (status === 'pending' && 'warning') ||
-              'error'
-            }
-            sx={{ textTransform: 'capitalize' }}
-          >
-            {status ? sentenceCase(status) : ''}
-          </Label>
-        </TableCell> 
-      </TableRow>
-
-       
- 
-    </>
+      <TableCell align="left">{providerType}</TableCell> 
+      <TableCell align="left">{serviceType}</TableCell>
+      <TableCell align="left">{recipient}</TableCell>
+      <TableCell align="left">₦{fCurrency(amount)}</TableCell> 
+      <TableCell align="left">
+        <Label
+          variant="soft"
+          color={
+            (status === 'success' && 'success') ||
+            (status === 'pending' && 'warning') ||
+            'error'
+          }
+          sx={{ textTransform: 'capitalize' }}
+        >
+          {status ? sentenceCase(status) : ''}
+        </Label>
+      </TableCell> 
+    </TableRow>
   );
 }

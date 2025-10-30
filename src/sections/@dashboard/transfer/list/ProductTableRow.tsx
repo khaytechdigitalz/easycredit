@@ -28,20 +28,13 @@ interface IProduct {
   status: string;
   amount: number;
   createdAt: string;
-}
-interface IProduct {
-  userId: string;
   // --- New/Corrected Properties to Add ---
   reference: string;          // Add this
-  recipient: string;          // Add this (if it was missing)
   customerAccountNo: string;  // Add this
   // ---------------------------------------
-  providerType: string;
-  status: string;
-  amount: number;
-  createdAt: string;
   // ... other existing properties
 }
+
 export default function ProductTableRow({
   row,
   selected,
@@ -49,44 +42,39 @@ export default function ProductTableRow({
 }: Props) {
   const { userId, reference, recipient,customerAccountNo, providerType, status,amount, createdAt } = row;
     
-
+  // Fix: Remove the unnecessary Fragment <> ... </>
   return (
-    <>
-      <TableRow hover selected={selected}> 
+    <TableRow hover selected={selected}> 
 
-        <TableCell>
-          <Stack direction="row" alignItems="left" spacing={2}>
-              {fDate(createdAt)} 
-          </Stack>
-        </TableCell>
-        <TableCell>
-          <Stack direction="row" alignItems="left" spacing={2}>
-              {userId} 
-          </Stack>
-        </TableCell>
+      <TableCell>
+        <Stack direction="row" alignItems="left" spacing={2}>
+            {fDate(createdAt)} 
+        </Stack>
+      </TableCell>
+      <TableCell>
+        <Stack direction="row" alignItems="left" spacing={2}>
+            {userId} 
+        </Stack>
+      </TableCell>
 
-        <TableCell align="left">{reference}</TableCell>
-        <TableCell align="left">{providerType}</TableCell> 
-        <TableCell align="left">{recipient}</TableCell>
-        <TableCell align="left">{customerAccountNo}</TableCell>
-        <TableCell align="left">₦{fCurrency(amount)}</TableCell> 
-        <TableCell align="left">
-          <Label
-            variant="soft"
-            color={
-              (status === 'success' && 'success') ||
-              (status === 'pending' && 'warning') ||
-              'error'
-            }
-            sx={{ textTransform: 'capitalize' }}
-          >
-            {status ? sentenceCase(status) : ''}
-          </Label>
-        </TableCell> 
-      </TableRow>
-
-       
- 
-    </>
+      <TableCell align="left">{reference}</TableCell>
+      <TableCell align="left">{providerType}</TableCell> 
+      <TableCell align="left">{recipient}</TableCell>
+      <TableCell align="left">{customerAccountNo}</TableCell>
+      <TableCell align="left">₦{fCurrency(amount)}</TableCell> 
+      <TableCell align="left">
+        <Label
+          variant="soft"
+          color={
+            (status === 'success' && 'success') ||
+            (status === 'pending' && 'warning') ||
+            'error'
+          }
+          sx={{ textTransform: 'capitalize' }}
+        >
+          {status ? sentenceCase(status) : ''}
+        </Label>
+      </TableCell> 
+    </TableRow>
   );
 }

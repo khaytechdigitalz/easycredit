@@ -103,7 +103,6 @@ export default function EcommerceProductListPage() {
 
   const [filterStatus, setFilterStatus] = useState<string[]>([]);
 
-  const [setOpenConfirm] = useState(false);
 
 
   const [responselog, setDashlog] = useState<any>(null);

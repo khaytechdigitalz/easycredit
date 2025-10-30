@@ -105,18 +105,43 @@ const {
  
 
   useEffect(() => {
-  const dataFromApi = responselog?.data.data;
+  const dataFromApi = responselog?.data?.data;
   if (typeof dataFromApi === 'object' && dataFromApi !== null && !Array.isArray(dataFromApi)) {
-      const dataAsArray = Object.values(dataFromApi);
+    const dataAsArray = Object.values(dataFromApi);
 
-     if (dataAsArray.length > 0) {
-       setTableData(dataAsArray);
+    // Validate and type-assert the data
+    if (dataAsArray.length > 0) {
+      // Type guard to validate the array items match IProduct structure
+      const isValidProductArray = dataAsArray.every(item => 
+        item && 
+        typeof item === 'object' && 
+        '_id' in item // Add checks for required IProduct properties
+      );
+      
+      if (isValidProductArray) {
+        setTableData(dataAsArray as IProduct[]);
+      } else {
+        console.error('Data does not match IProduct structure:', dataAsArray);
+        // Handle invalid data - maybe set an empty array or default values
+        setTableData([]);
+      }
     }
-
   } else if (Array.isArray(dataFromApi)) {
     console.info("Data was already an array:", dataFromApi);
     if (dataFromApi.length > 0) {
-        setTableData(dataFromApi);
+      // Same validation before setting
+      const isValidProductArray = dataFromApi.every(item => 
+        item && 
+        typeof item === 'object' && 
+        '_id' in item // Add checks for required IProduct properties
+      );
+      
+      if (isValidProductArray) {
+        setTableData(dataFromApi as IProduct[]);
+      } else {
+        console.error('Data does not match IProduct structure:', dataFromApi);
+        setTableData([]);
+      }
     }
   }
 }, [responselog]);

@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { sentenceCase } from 'change-case';
 // @mui
 import {
@@ -10,7 +9,6 @@ import {
 import { fDate } from '../../../../utils/formatTime';
 import { fCurrency } from '../../../../utils/formatNumber';
 // @types
-import { IProduct } from '../../../../@types/product';
 // components
 import Label from '../../../../components/label';
  
@@ -19,20 +17,26 @@ import Label from '../../../../components/label';
 type Props = {
   row: IProduct;
   selected: boolean;
-  onViewRow: VoidFunction;
   onSelectRow: VoidFunction;
  };
-
+interface IProduct {
+  userId: string;
+  billId: string | number; // Use the correct type for billId
+  serviceType: string;
+  recipient: string;
+  providerType: string;
+  status: string;
+  amount: number;
+  createdAt: string;
+}
 export default function ProductTableRow({
   row,
   selected,
   onSelectRow,
-  onViewRow,
-}: Props) {
-  const { userId, billId,serviceType, recipient,providerType, status,amount, createdAt } = row;
+ }: Props) {
+  const { userId, billId, serviceType, recipient,providerType, status,amount, createdAt } = row;
 
 
-  const [openPopover, setOpenPopover] = useState<HTMLElement | null>(null);
    
 
   return (

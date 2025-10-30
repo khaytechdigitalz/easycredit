@@ -6,13 +6,16 @@
       "es6",
       "dom"
     ],
+    "noEmitOnError": false, // Ensures output files are generated even with errors
+    
+    // Optional: Only use this if you want to also skip checking third-party library types.
+    "skipLibCheck": true,
     "strict": true,
     "noEmit": true,
     "allowJs": true,
     "jsx": "preserve",
     "module": "esnext",
-    "incremental": true,
-    "skipLibCheck": true,
+    "incremental": true, 
     "noImplicitAny": true,
     "noImplicitThis": true,
     "esModuleInterop": true,

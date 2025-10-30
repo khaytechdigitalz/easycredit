@@ -2,7 +2,6 @@ import { forwardRef } from 'react';
 // next
 import NextLink from 'next/link';
 // @mui
-import { useTheme } from '@mui/material/styles';
 import { Box, Link, BoxProps } from '@mui/material';
 
 // ----------------------------------------------------------------------
@@ -13,13 +12,13 @@ export interface LogoProps extends BoxProps {
 
 const Logo = forwardRef<HTMLDivElement, LogoProps>(
   ({ disabledLink = false, sx, ...other }, ref) => {
-    const theme = useTheme();
+    // const theme = useTheme();
 
-    const PRIMARY_LIGHT = theme.palette.primary.light;
+    // const PRIMARY_LIGHT = theme.palette.primary.light;
 
-    const PRIMARY_MAIN = theme.palette.primary.main;
+   // const PRIMARY_MAIN = theme.palette.primary.main;
 
-    const PRIMARY_DARK = theme.palette.primary.dark;
+   // const PRIMARY_DARK = theme.palette.primary.dark;
 
     // OR using local (public folder)
     // -------------------------------------------------------

@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { sentenceCase } from 'change-case';
 // @mui
 import {
@@ -9,8 +8,6 @@ import {
 // utils
 import { fDate } from '../../../../utils/formatTime';
 import { fCurrency } from '../../../../utils/formatNumber';
-// @types
-import { IProduct } from '../../../../@types/product';
 // components
 import Label from '../../../../components/label';
 
@@ -19,20 +16,38 @@ import Label from '../../../../components/label';
 type Props = {
   row: IProduct;
   selected: boolean;
-  onViewRow: VoidFunction;
   onSelectRow: VoidFunction;
  };
 
+interface IProduct {
+  userId: string;
+  billId: string | number; // Use the correct type for billId
+  serviceType: string;
+  recipient: string;
+  providerType: string;
+  status: string;
+  amount: number;
+  createdAt: string;
+}
+interface IProduct {
+  userId: string;
+  // --- New/Corrected Properties to Add ---
+  reference: string;          // Add this
+  recipient: string;          // Add this (if it was missing)
+  customerAccountNo: string;  // Add this
+  // ---------------------------------------
+  providerType: string;
+  status: string;
+  amount: number;
+  createdAt: string;
+  // ... other existing properties
+}
 export default function ProductTableRow({
   row,
   selected,
   onSelectRow,
-  onViewRow,
 }: Props) {
-  const { userId, reference, providerResponse, recipient,customerAccountNo, providerType, status,amount, createdAt } = row;
-
-
-  const [openPopover, setOpenPopover] = useState<HTMLElement | null>(null);
+  const { userId, reference, recipient,customerAccountNo, providerType, status,amount, createdAt } = row;
     
 
   return (

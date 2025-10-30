@@ -1,8 +1,6 @@
 // routes
 import { PATH_DASHBOARD } from '../../../routes/paths';
 // components
-import Label from '../../../components/label';
-import Iconify from '../../../components/iconify';
 import SvgColor from '../../../components/svg-color';
 
 // ----------------------------------------------------------------------
@@ -61,7 +59,7 @@ const navConfig = [
         icon: ICONS.user,
         children: [ 
           { title: 'list', path: PATH_DASHBOARD.client.list },
-          { title: 'create', path: PATH_DASHBOARD.client.create },
+         // { title: 'create', path: PATH_DASHBOARD.client.create },
         ],
       },
 
@@ -87,16 +85,16 @@ const navConfig = [
 
        // BILLS
       {
-        title: 'Bills Payment',
-        path: PATH_DASHBOARD.bills.root,
-        icon: ICONS.cart,
-        children: [
-          { title: 'All', path: PATH_DASHBOARD.bills.history+'?type=' },
-          { title: 'Airtime', path: PATH_DASHBOARD.bills.history+'?type=airtime' },
-          { title: 'Internet', path: PATH_DASHBOARD.bills.history+'?type=data' },
-          { title: 'Cable TV', path: PATH_DASHBOARD.bills.history+'?type=tv' },
-          { title: 'Electricity', path: PATH_DASHBOARD.bills.history+'?type=electricity' },
-        ],
+          title: 'Bills Payment',
+          path: PATH_DASHBOARD.bills.root,
+          icon: ICONS.cart,
+          children: [
+            { title: 'All', path: `${PATH_DASHBOARD.bills.history}?type=` }, // Template literal used
+            { title: 'Airtime', path: `${PATH_DASHBOARD.bills.history}?type=airtime` }, // Template literal used
+            { title: 'Internet', path: `${PATH_DASHBOARD.bills.history}?type=data` }, // Template literal used
+            { title: 'Cable TV', path: `${PATH_DASHBOARD.bills.history}?type=tv` }, // Template literal used
+            { title: 'Electricity', path: `${PATH_DASHBOARD.bills.history}?type=electricity` }, // Template literal used
+          ],
       },
       
        {

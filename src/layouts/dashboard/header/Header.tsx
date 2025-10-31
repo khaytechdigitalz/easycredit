@@ -57,8 +57,6 @@ export default function Header({ onOpenNav }: Props) {
       >
         <LanguagePopover />
 
- 
-
         <AccountPopover />
       </Stack>
     </>

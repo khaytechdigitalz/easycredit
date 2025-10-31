@@ -103,7 +103,7 @@ const navConfig = [
         icon: ICONS.banking,
         children: [
           { title: 'Bank Transfer', path: PATH_DASHBOARD.transfer.bank },
-          { title: 'User Transfer', path: PATH_DASHBOARD.transfer.user },
+          { title: 'User Transfer', path: '#' },
         ],
       },
       
@@ -215,11 +215,13 @@ const navConfig = [
         ],
       },
       */
+     /*
       {
         title: 'Settings',
         path: PATH_DASHBOARD.fileManager,
         icon: ICONS.folder,
       },
+      */
     ],
   },
 

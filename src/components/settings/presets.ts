@@ -11,13 +11,13 @@ export const presets = [
   // DEFAULT
   {
     name: 'default',
-    lighter: '#D1E9FC',
-    light: '#76B0F1',
-    main: '#2065D1',
-    dark: '#103996',
-    darker: '#061B64',
+    // ...themePalette.primary,
+     lighter: '#CCF4FE',
+    light: '#68CDF9',
+    main: '#2CAEE4',
+    dark: '#0351AB',
+    darker: '#012972',
     contrastText: '#FFFFFF',
-    //...themePalette.primary,
   },
   // CYAN
   {

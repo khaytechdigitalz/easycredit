@@ -17,6 +17,7 @@ import {
   AccountBilling,
   AccountLoans,
   AccountBills,
+  AccountBeneficiary,
   AccountChangePassword,
 } from '../../../sections/@dashboard/users/account';
 
@@ -49,6 +50,12 @@ export default function UserAccountPage() {
         />
       ),
     },
+    {
+      value: 'beneficiary',
+      label: 'Beneficiary',
+      icon: <Iconify icon="ic:round-badge" />,
+      component: <AccountBeneficiary />,
+    }, 
 
     {
       value: 'loan',

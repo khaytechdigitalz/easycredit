@@ -5,7 +5,7 @@ import {
   Button,
   Select,
   MenuItem,
-  Checkbox,
+  Radio,
   TextField,
   InputLabel,
   FormControl,
@@ -55,12 +55,12 @@ export default function ProductTableToolbar({
           width: { xs: 1, md: 240 },
         }}
       >
-        <InputLabel sx={{ '&.Mui-focused': { color: 'text.primary' } }}>Status</InputLabel>
+        <InputLabel sx={{ '&.Mui-focused': { color: 'text.primary' } }}>Type</InputLabel>
         <Select
           multiple
           value={filterStatus}
           onChange={onFilterStatus}
-          input={<OutlinedInput label="Status" />}
+          input={<OutlinedInput label="Type" />}
           renderValue={(selected) => selected.map((value) => sentenceCase(value)).join(', ')}
         >
           {statusOptions.map((option) => (
@@ -75,7 +75,7 @@ export default function ProductTableToolbar({
                 textTransform: 'capitalize',
               }}
             >
-              <Checkbox disableRipple size="small" checked={filterStatus.includes(option.value)} />
+              <Radio disableRipple size="small" checked={filterStatus.includes(option.value)} />
               {option.label}
             </MenuItem>
           ))}

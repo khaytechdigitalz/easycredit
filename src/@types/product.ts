@@ -48,6 +48,7 @@ export type IProduct = {
   dueDate: string;
   phone: string;
   status: string;
+  type: string;
   nationality: string;
   phoneVerified: boolean;
   inventoryType: string;

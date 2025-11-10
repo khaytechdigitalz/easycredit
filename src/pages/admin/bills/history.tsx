@@ -76,10 +76,12 @@ const TABLE_HEAD = [
 ];
 
 const STATUS_OPTIONS = [
-  { value: 'success', label: 'Successful' },
-  { value: 'failed', label: 'Failed' },
+  { value: 'airtime', label: 'Airtime' },
+  { value: 'data', label: 'Internet' },
+  { value: 'tv', label: 'Cable TV' },
+  { value: 'electricity', label: 'Electricity' },
+  { value: 'transfer', label: 'Bank Transfer' },
 ];
-
 // ----------------------------------------------------------------------
 
 BillsPage.getLayout = (page: React.ReactElement) => (
@@ -488,7 +490,7 @@ function applyFilter({
   }
 
   if (filterStatus.length) {
-    inputData = inputData.filter((product) => filterStatus.includes(product.status));
+    inputData = inputData.filter((product) => filterStatus.includes(product.serviceType));
   }
 
   return inputData;

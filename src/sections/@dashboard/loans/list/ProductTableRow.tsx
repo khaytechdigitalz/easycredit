@@ -33,7 +33,7 @@ export default function ProductTableRow({
   onSelectRow,
   onViewRow,
 }: Props) {
-  const { _id, userId, purpose,interestRate, term, status,amount, applicationDate } = row;
+  const { _id, purpose,interestRate, term, status,amount, applicationDate } = row;
 
 
   const [openPopover, setOpenPopover] = useState<HTMLElement | null>(null);

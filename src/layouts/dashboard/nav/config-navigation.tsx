@@ -59,7 +59,7 @@ const navConfig = [
         icon: ICONS.user,
         children: [ 
           { title: 'list', path: PATH_DASHBOARD.client.list },
-         // { title: 'create', path: PATH_DASHBOARD.client.create },
+          { title: 'create', path: PATH_DASHBOARD.client.create },
         ],
       },
 

@@ -71,7 +71,8 @@ const navConfig = [
         children: [
  
           { title: 'Manage Loans ', path: PATH_DASHBOARD.loan.applications },
-         // { title: 'Loans Products', path: PATH_DASHBOARD.loan.product },
+          { title: 'Loan Packages', path: PATH_DASHBOARD.loan.product },
+          { title: 'Loan Purpose', path: PATH_DASHBOARD.loan.purpose },
          // { title: 'View Loans', path: PATH_DASHBOARD.loan.loans },
          // { title: 'Create Loans', path: PATH_DASHBOARD.loan.create_new_loan },
          // { title: 'Loan Repayment', path: PATH_DASHBOARD.loan.repayments },
@@ -107,6 +108,28 @@ const navConfig = [
         ],
       },
       
+       // Complaint
+      {
+        title: 'Compliant Category',
+        path: PATH_DASHBOARD.complaint.root,
+        icon: ICONS.label,
+        children: [ 
+          { title: 'list', path: PATH_DASHBOARD.complaint.list },
+          { title: 'create', path: PATH_DASHBOARD.complaint.create },
+        ],
+      },
+
+       // Complaint
+      {
+        title: 'FAQ',
+        path: PATH_DASHBOARD.faq.root,
+        icon: ICONS.label,
+        children: [ 
+          { title: 'list', path: PATH_DASHBOARD.faq.list },
+          { title: 'create', path: PATH_DASHBOARD.faq.create },
+        ],
+      },
+
       // INVOICE
       /*
       {

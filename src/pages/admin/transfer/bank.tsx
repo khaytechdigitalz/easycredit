@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react'; // Added useMemo
 // next
 import Head from 'next/head';
 
@@ -10,6 +10,8 @@ import {
   Container,
   Grid,
   TableContainer,
+  Button, // Added Button
+  Stack, // Added Stack
 } from '@mui/material';
 import { SelectChangeEvent } from '@mui/material/Select';
 // redux
@@ -17,8 +19,6 @@ import axios from '../../../utils/axios';
 import { useSelector } from '../../../redux/store';
  // routes
 import { PATH_DASHBOARD } from '../../../routes/paths';
-// @types
-import { IProduct } from '../../../@types/product';
 // layouts
 import DashboardLayout from '../../../layouts/dashboard';
 // components
@@ -36,6 +36,8 @@ import {
 } from '../../../components/table';
 import Scrollbar from '../../../components/scrollbar';
 import CustomBreadcrumbs from '../../../components/custom-breadcrumbs';
+import Iconify from '../../../components/iconify'; // Assuming Iconify is available
+import { useSnackbar } from '../../../components/snackbar'; // Added Snackbar
 // sections
 import { ProductTableRow, ProductTableToolbar } from '../../../sections/@dashboard/transfer/list';
 
@@ -48,16 +50,29 @@ import {
   BookingIllustration, 
 } from '../../../assets/illustrations';
 // ----------------------------------------------------------------------
+// Define the specific structure of the data row based on your table
+export interface ITransferItem {
+  _id: string; // Key for iteration/selection
+  date: string; 
+  userId: string;
+  reference: string;
+  bankName: string;
+  accountNumber: string | number; 
+  accountName: string; 
+  amount: number;
+  status: string;
+}
 
+// Corrected TABLE_HEAD with distinct IDs for proper sorting/export mapping
 const TABLE_HEAD = [
-  { id: 'name', label: 'Date', align: 'left' }, 
-  { id: 'name', label: 'User ID', align: 'left' },
-  { id: 'name', label: 'Reference', align: 'left' },
-  { id: 'name', label: 'Bank Name', align: 'left' },
-  { id: 'name', label: 'Account Number', align: 'left' }, 
-  { id: 'name', label: 'Account Name', align: 'left' }, 
-  { id: 'name', label: 'Amount', align: 'left' },
-  { id: 'name', label: 'Status', align: 'left' },
+  { id: 'date', label: 'Date', align: 'left' }, 
+  { id: 'userId', label: 'User ID', align: 'left' },
+  { id: 'reference', label: 'Reference', align: 'left' },
+  { id: 'bankName', label: 'Bank Name', align: 'left' },
+  { id: 'accountNumber', label: 'Account Number', align: 'left' }, 
+  { id: 'accountName', label: 'Account Name', align: 'left' }, 
+  { id: 'amount', label: 'Amount', align: 'left' },
+  { id: 'status', label: 'Status', align: 'left' },
 ];
 
 const STATUS_OPTIONS = [
@@ -67,13 +82,15 @@ const STATUS_OPTIONS = [
 
 // ----------------------------------------------------------------------
 
-BillsPage.getLayout = (page: React.ReactElement) => (
+TransferPage.getLayout = (page: React.ReactElement) => (
   <DashboardLayout>{page}</DashboardLayout>
 );
 
 // ----------------------------------------------------------------------
 
-export default function BillsPage() {
+export default function TransferPage() {
+  const { enqueueSnackbar } = useSnackbar();
+
   const {
     dense,
     page,
@@ -91,7 +108,7 @@ export default function BillsPage() {
     onChangePage,
     onChangeRowsPerPage,
   } = useTable({
-    defaultOrderBy: 'createdAt',
+    defaultOrderBy: 'date',
   });
 
   const { themeStretch } = useSettingsContext();
@@ -99,7 +116,7 @@ export default function BillsPage() {
 
   const { isLoading } = useSelector((state) => state.product);
 
-  const [tableData, setTableData] = useState<IProduct[]>([]);
+  const [tableData, setTableData] = useState<ITransferItem[]>([]);
 
   const [filterName, setFilterName] = useState('');
 
@@ -116,6 +133,7 @@ export default function BillsPage() {
             'Authorization': `Bearer ${accessToken}`
           }
         }; 
+        // Endpoint for Bank Transfer Log
         const apiResponse = await axios.get('/admin/bill/history/transfer', config);
 
         setDashlog(apiResponse.data);
@@ -130,54 +148,41 @@ export default function BillsPage() {
   
   useEffect(() => {
   const dataFromApi = responselog?.data?.data;
-  if (typeof dataFromApi === 'object' && dataFromApi !== null && !Array.isArray(dataFromApi)) {
-    const dataAsArray = Object.values(dataFromApi);
 
-    // Validate and type-assert the data
-    if (dataAsArray.length > 0) {
-      // Type guard to validate the array items match IProduct structure
-      const isValidProductArray = dataAsArray.every(item => 
-        item && 
-        typeof item === 'object' && 
-        '_id' in item // Add checks for required IProduct properties
-      );
+  const processData = (data: any[] | Record<string, any>) => {
+    const finalArray: any[] = Array.isArray(data) ? data : Object.values(data || {});
+
+    // Basic validation and type-assertion
+    const isValidTransferArray = finalArray.every(item => 
+      item && 
+      typeof item === 'object' && 
+      '_id' in item // Ensure primary key exists
+    );
       
-      if (isValidProductArray) {
-        setTableData(dataAsArray as IProduct[]);
-      } else {
-        console.error('Data does not match IProduct structure:', dataAsArray);
-        // Handle invalid data - maybe set an empty array or default values
+    if (isValidTransferArray) {
+        setTableData(finalArray as ITransferItem[]);
+    } else {
+        console.error('Data does not match expected ITransferItem structure.', finalArray);
         setTableData([]);
-      }
     }
-  } else if (Array.isArray(dataFromApi)) {
-    console.info("Data was already an array:", dataFromApi);
-    if (dataFromApi.length > 0) {
-      // Same validation before setting
-      const isValidProductArray = dataFromApi.every(item => 
-        item && 
-        typeof item === 'object' && 
-        '_id' in item // Add checks for required IProduct properties
-      );
-      
-      if (isValidProductArray) {
-        setTableData(dataFromApi as IProduct[]);
-      } else {
-        console.error('Data does not match IProduct structure:', dataFromApi);
-        setTableData([]);
-      }
-    }
+  };
+
+  if (dataFromApi) {
+    processData(dataFromApi);
+  } else if (Array.isArray(responselog)) {
+    processData(responselog);
   }
 }, [responselog]);
 
 
   
-  const dataFiltered = applyFilter({
+  const dataFiltered = useMemo(() => applyFilter({
     inputData: tableData,
     comparator: getComparator(order, orderBy),
     filterName,
     filterStatus,
-  });
+  }), [tableData, order, orderBy, filterName, filterStatus]);
+
 
   const denseHeight = dense ? 60 : 80;
 
@@ -198,11 +203,119 @@ export default function BillsPage() {
     setFilterStatus(typeof value === 'string' ? value.split(',') : value);
   };
   
- 
-
   const handleResetFilter = () => {
     setFilterName('');
     setFilterStatus([]);
+  };
+
+  // ----------------------------------------------------------------------
+  // 💾 CSV Export Function
+  // ----------------------------------------------------------------------
+  const exportToCsv = () => {
+    if (!dataFiltered || dataFiltered.length === 0) {
+        enqueueSnackbar('No data to export.', { variant: 'warning' });
+        return;
+    }
+    
+    // 1. Prepare Headers (use labels from TABLE_HEAD)
+    const headers = TABLE_HEAD
+        .map(head => head.label)
+        .join(',');
+
+    // 2. Prepare Data Rows (Ensure property names match ITransferItem)
+    const csvRows = dataFiltered.map((row) => {
+        const rowData = row as ITransferItem;
+        const values = [
+            rowData.date, 
+            rowData.userId, 
+            rowData.reference, 
+            rowData.bankName, 
+            rowData.accountNumber, 
+            rowData.accountName, 
+            rowData.amount, 
+            rowData.status,
+        ].map(value => {
+            const stringValue = String(value);
+            if (stringValue.includes(',')) {
+                return `"${stringValue}"`;
+            }
+            return stringValue;
+        }).join(',');
+        
+        return values;
+    });
+
+    const csvContent = [headers, ...csvRows].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'bank_transfer_log.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    enqueueSnackbar('CSV exported successfully!', { variant: 'success' });
+  };
+
+
+  // ----------------------------------------------------------------------
+  // 📊 Excel Export Function
+  // ----------------------------------------------------------------------
+  const exportToExcel = () => {
+    if (!dataFiltered || dataFiltered.length === 0) {
+        enqueueSnackbar('No data to export.', { variant: 'warning' });
+        return;
+    }
+
+    const headers = TABLE_HEAD.map(head => `<th>${head.label}</th>`).join('');
+    
+    const tableRows = dataFiltered.map((row) => {
+      const rowData = row as ITransferItem;
+      const rowValues = [
+          rowData.date, 
+          rowData.userId, 
+          rowData.reference, 
+          rowData.bankName, 
+          rowData.accountNumber, 
+          rowData.accountName, 
+          rowData.amount, 
+          rowData.status,
+      ].map(value => `<td>${value}</td>`).join('');
+      
+      return `<tr>${rowValues}</tr>`;
+    }).join('');
+
+    const tableHTML = `
+      <table>
+        <thead><tr>${headers}</tr></thead>
+        <tbody>${tableRows}</tbody>
+      </table>
+    `;
+
+    const excelContent = `
+      <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+      <head>
+          <meta charset="utf-8">
+          </head>
+      <body>
+        ${tableHTML}
+      </body>
+      </html>
+    `;
+    
+    const blob = new Blob([excelContent], { type: 'application/vnd.ms-excel' });
+    const url = URL.createObjectURL(blob);
+    
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'bank_transfer_log.xls');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    enqueueSnackbar('Excel exported successfully!', { variant: 'success' });
   };
 
   return (
@@ -234,9 +347,7 @@ export default function BillsPage() {
           <br/>
 
         <Card>
-
-          
-
+          {/* 1. Existing Toolbar */}
           <ProductTableToolbar
             filterName={filterName}
             filterStatus={filterStatus}
@@ -247,6 +358,32 @@ export default function BillsPage() {
             onResetFilter={handleResetFilter}
           />
 
+          {/* 2. 💡 Export Buttons placed right after the toolbar */}
+          <Stack 
+              direction="row" 
+              spacing={1} 
+              justifyContent="flex-end"
+              sx={{ p: 1.5, pr: 3, pt: 0 }} 
+          >
+              <Button
+                  variant="outlined"
+                  onClick={exportToCsv}
+                  startIcon={<Iconify icon="eva:file-text-fill" />}
+                  disabled={!dataFiltered.length}
+              >
+                  Export CSV
+              </Button>
+              <Button
+                  variant="contained"
+                  onClick={exportToExcel}
+                  startIcon={<Iconify icon="eva:cloud-download-fill" />}
+                  disabled={!dataFiltered.length}
+              >
+                  Export XLS
+              </Button>
+          </Stack>
+          {/* END OF EXPORT BUTTONS */}
+
           <TableContainer sx={{ position: 'relative', overflow: 'unset' }}>
             <TableSelectedAction
               dense={dense}
@@ -255,7 +392,7 @@ export default function BillsPage() {
               onSelectAllRows={(checked) =>
                 onSelectAllRows(
                   checked,
-                  tableData.map((row) => row.id)
+                  tableData.map((row) => row._id) // Assuming _id is used for selection
                 )
               } 
             />
@@ -278,7 +415,7 @@ export default function BillsPage() {
                       row ? (
                         <ProductTableRow
                           key={row?._id}
-                          row={row}
+                          row={row} // Pass the entire row object
                           selected={selected.includes(row?._id)}
                           onSelectRow={() => onSelectRow(row?._id)}
                          />
@@ -323,7 +460,7 @@ function applyFilter({
   filterName,
   filterStatus,
 }: {
-  inputData: IProduct[];
+  inputData: ITransferItem[]; // Using the specific Transfer Item type
   comparator: (a: any, b: any) => number;
   filterName: string;
   filterStatus: string[];
@@ -339,13 +476,16 @@ function applyFilter({
   inputData = stabilizedThis.map((el) => el[0]);
 
   if (filterName) {
+    // Filter by User ID or Reference Number
     inputData = inputData.filter(
-      (product) => product.userId.toLowerCase().indexOf(filterName.toLowerCase()) !== -1
+      (product) => product.userId.toLowerCase().includes(filterName.toLowerCase()) || 
+                   product.reference.toLowerCase().includes(filterName.toLowerCase())
     );
   }
 
   if (filterStatus.length) {
-    inputData = inputData.filter((product) => filterStatus.includes(product.inventoryType));
+    // Filter by status
+    inputData = inputData.filter((product) => filterStatus.includes(product.status));
   }
 
   return inputData;

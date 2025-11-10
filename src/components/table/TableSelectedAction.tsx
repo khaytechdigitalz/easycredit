@@ -1,5 +1,5 @@
 // @mui
-import { Checkbox, Typography, Stack, StackProps } from '@mui/material';
+import { Typography, Stack, StackProps } from '@mui/material';
 
 // ----------------------------------------------------------------------
 
@@ -44,15 +44,7 @@ export default function TableSelectedAction({
         ...sx,
       }}
       {...other}
-    >
-      <Checkbox
-        indeterminate={numSelected > 0 && numSelected < rowCount}
-        checked={rowCount > 0 && numSelected === rowCount}
-        onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
-          onSelectAllRows(event.target.checked)
-        }
-      />
-
+    > 
       <Typography
         variant="subtitle1"
         sx={{

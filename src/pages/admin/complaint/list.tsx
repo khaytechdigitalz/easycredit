@@ -1,27 +1,21 @@
-import { paramCase } from 'change-case';
 import { useState, useEffect, useMemo } from 'react';
 // next
 import Head from 'next/head';
-import { useRouter } from 'next/router';
 
 // @mui
 import {
   Card,
   Table,
-  Tooltip,
   TableBody,
   Container,
-  Grid,
-  IconButton,
   TableContainer,
-  Button, // Added Button
-  Stack, // Added Stack
+  Button,
+  Stack,
 } from '@mui/material';
-import { SelectChangeEvent } from '@mui/material/Select';
 // redux
 import axios from '../../../utils/axios';
 import { useSelector } from '../../../redux/store';
- // routes
+// routes
 import { PATH_DASHBOARD } from '../../../routes/paths';
 // layouts
 import DashboardLayout from '../../../layouts/dashboard';
@@ -35,68 +29,48 @@ import {
   TableSkeleton,
   TableEmptyRows,
   TableHeadCustom,
-  TableSelectedAction,
   TablePaginationCustom,
 } from '../../../components/table';
 import Iconify from '../../../components/iconify';
+import { useSnackbar } from '../../../components/snackbar';
 import Scrollbar from '../../../components/scrollbar';
 import CustomBreadcrumbs from '../../../components/custom-breadcrumbs';
-import { useSnackbar } from '../../../components/snackbar'; // Added Snackbar
 // sections
-import { ProductTableRow, ProductTableToolbar } from '../../../sections/@dashboard/loans/list';
-
-
-import { 
-  BookingWidgetSummary, 
-} from '../../../sections/@dashboard/loans/stat';
-// assets
-import {
-  BookingIllustration, 
-} from '../../../assets/illustrations';
+import { ProductTableRow, ProductTableToolbar } from '../../../sections/@dashboard/complaint/list';
+// types
+import { IProductState } from '../../../@types/product'; 
 
 // ----------------------------------------------------------------------
-// Define the specific structure of the data row
-export interface ILoanItem {
+// Define the specific structure of the data row (Complaint Category)
+export interface ICustomerItem {
   _id: string; 
-  date: string; 
-  loanId: string;
-  userId: string;
-  amount: number;
-  repaymentCycle: string;
-  purpose: string;
-  interestRate: number;
-  status: string;
+  text: string; 
+  // Add other fields present in the API response that correspond to the table headers
 }
 
-// Corrected TABLE_HEAD with distinct IDs
-const TABLE_HEAD = [
-  { id: 'date', label: 'Date', align: 'left' }, 
-  { id: 'loanId', label: 'Loan ID', align: 'left' },
-  { id: 'userId', label: 'User ID', align: 'left' },
-  { id: 'amount', label: 'Amount', align: 'left' },
-  { id: 'repaymentCycle', label: 'Repayment Cycle', align: 'left' },
-  { id: 'purpose', label: 'Purpose', align: 'left' },
-  { id: 'interestRate', label: 'Interest Rate', align: 'left' },
-  { id: 'status', label: 'Status', align: 'left' },
-  { id: '' },
-];
+// Define the structure for your table header
+interface HeadLabel {
+  id: keyof ICustomerItem | 'actions' | string;
+  label: string;
+  align?: 'left' | 'center' | 'right';
+}
 
-const STATUS_OPTIONS = [
-  { value: 'paid', label: 'Paid' },
-  { value: 'pending', label: 'Pending' },
+const TABLE_HEAD: HeadLabel[] = [
+  { id: '_id', label: 'ID', align: 'left' },
+  { id: 'text', label: 'Text', align: 'left' },
 ];
-
+ 
 // ----------------------------------------------------------------------
 
-LoanListPage.getLayout = (page: React.ReactElement) => (
+CustomerListPage.getLayout = (page: React.ReactElement) => (
   <DashboardLayout>{page}</DashboardLayout>
 );
 
 // ----------------------------------------------------------------------
 
-export default function LoanListPage() {
+export default function CustomerListPage() {
   const { enqueueSnackbar } = useSnackbar();
-  
+
   const {
     dense,
     page,
@@ -106,9 +80,7 @@ export default function LoanListPage() {
     setPage,
     //
     selected,
-    onSelectRow,
-    onSelectAllRows,
-    //
+     //
     onSort,
     onChangeDense,
     onChangePage,
@@ -119,18 +91,14 @@ export default function LoanListPage() {
 
   const { themeStretch } = useSettingsContext();
 
-  const { push } = useRouter();
+  // Assuming product slice has an isLoading state
+  const { isLoading } = useSelector((state) => state.product as IProductState); 
 
-  const { isLoading } = useSelector((state) => state.product);
-
-  const [tableData, setTableData] = useState<ILoanItem[]>([]);
+  const [tableData, setTableData] = useState<ICustomerItem[]>([]);
 
   const [filterName, setFilterName] = useState('');
 
-  const [filterStatus, setFilterStatus] = useState<string[]>([]);
-
-
-  const [loanlog, setDashlog] = useState<any>(null);
+  const [responselog, setDashlog] = useState<ICustomerItem[] | null>(null); 
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -142,85 +110,51 @@ export default function LoanListPage() {
           }
         }; 
 
-        const loansResponse = await axios.get('/admin-dashboard/d/recent-loans', config);
-        setDashlog(loansResponse.data);
+        const requestResponse = await axios.get('/admin/complaint-category', config);
+        
+        if (requestResponse.data && requestResponse.data.data && Array.isArray(requestResponse.data.data.data)) {
+            setDashlog(requestResponse.data.data.data as ICustomerItem[]);
+        } else {
+            setDashlog([]);
+        }
+        
       } catch (error) {
-        console.error(error);
+        console.error("Error fetching complaint categories:", error);
+        enqueueSnackbar('Failed to fetch complaint categories.', { variant: 'error' });
+        setDashlog([]); 
       }
     };
 
     fetchDashboardData();
-  }, []);
- 
+  }, [enqueueSnackbar]); 
+
   useEffect(() => {
-    if (loanlog?.length) {
-      setTableData(loanlog as ILoanItem[]);
+    if (responselog && Array.isArray(responselog)) {
+      setTableData(responselog);
     }
-  }, [loanlog]);
-
-
-  const [loanstat, setDashstat] = useState<any>(null);
-
-  useEffect(() => {
-    const fetchLoanData = async () => {
-      try {
-        const accessToken = localStorage.getItem('accessToken');
-        const config = {
-          headers: {
-            'Authorization': `Bearer ${accessToken}`
-          }
-        }; 
-
-        const loansStat = await axios.get('/admin/loans/stats', config);
-        setDashstat(loansStat.data.data);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
-    fetchLoanData();
-  }, []);
- 
-  useEffect(() => {}, [loanstat]);
+  }, [responselog]);
 
   const dataFiltered = useMemo(() => applyFilter({
     inputData: tableData,
     comparator: getComparator(order, orderBy),
     filterName,
-    filterStatus,
-  }), [tableData, order, orderBy, filterName, filterStatus]);
+  }), [tableData, order, orderBy, filterName]);
 
 
   const denseHeight = dense ? 60 : 80;
 
-  const isFiltered = filterName !== '' || !!filterStatus.length;
+  const isFiltered = filterName !== ''; 
 
   const isNotFound = (!dataFiltered.length && !!filterName) || (!isLoading && !dataFiltered.length);
-
-  const handleOpenConfirm = () => {
-  };
  
   const handleFilterName = (event: React.ChangeEvent<HTMLInputElement>) => {
     setPage(0);
     setFilterName(event.target.value);
   };
-
-  const handleFilterStatus = (event: SelectChangeEvent<string[]>) => {
-    const {
-      target: { value },
-    } = event;
-    setPage(0);
-    setFilterStatus(typeof value === 'string' ? value.split(',') : value);
-  };
-  
-
-  const handleViewRow = (id: string) => {
-    push(PATH_DASHBOARD.loan.view(paramCase(id)));
-  };
+   
 
   const handleResetFilter = () => {
     setFilterName('');
-    setFilterStatus([]);
   };
 
   // ----------------------------------------------------------------------
@@ -232,7 +166,7 @@ export default function LoanListPage() {
         return;
     }
     
-    // 1. Prepare Headers
+    // 1. Prepare Headers (Exclude the last item which is the action column)
     const headers = TABLE_HEAD
         .slice(0, -1)
         .map(head => head.label)
@@ -240,18 +174,13 @@ export default function LoanListPage() {
 
     // 2. Prepare Data Rows
     const csvRows = dataFiltered.map((row) => {
-        const rowData = row as ILoanItem;
+        const rowData: ICustomerItem = row; 
         const values = [
-            rowData.date, 
-            rowData.loanId, 
-            rowData.userId, 
-            rowData.amount, 
-            rowData.repaymentCycle, 
-            rowData.purpose, 
-            rowData.interestRate,
-            rowData.status,
+            rowData._id, 
+            rowData.text, 
         ].map(value => {
             const stringValue = String(value);
+            // Enclose in double quotes if the string contains a comma
             if (stringValue.includes(',')) {
                 return `"${stringValue}"`;
             }
@@ -267,7 +196,7 @@ export default function LoanListPage() {
     
     const link = document.createElement('a');
     link.setAttribute('href', url);
-    link.setAttribute('download', 'loan_applications.csv');
+    link.setAttribute('download', 'complaint_category_list.csv');
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -285,19 +214,14 @@ export default function LoanListPage() {
         return;
     }
 
+    // Excludes the last item which is the action column
     const headers = TABLE_HEAD.slice(0, -1).map(head => `<th>${head.label}</th>`).join('');
     
     const tableRows = dataFiltered.map((row) => {
-      const rowData = row as ILoanItem;
+      const rowData: ICustomerItem = row; 
       const rowValues = [
-          rowData.date, 
-          rowData.loanId, 
-          rowData.userId, 
-          rowData.amount, 
-          rowData.repaymentCycle, 
-          rowData.purpose, 
-          rowData.interestRate,
-          rowData.status,
+          rowData._id, 
+          rowData.text,  
       ].map(value => `<td>${value}</td>`).join('');
       
       return `<tr>${rowValues}</tr>`;
@@ -326,7 +250,7 @@ export default function LoanListPage() {
     
     const link = document.createElement('a');
     link.setAttribute('href', url);
-    link.setAttribute('download', 'loan_applications.xls');
+    link.setAttribute('download', 'complaint_category_list.xls');
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -338,64 +262,31 @@ export default function LoanListPage() {
   return (
     <>
       <Head>
-        <title> Loan: Loan Applications | Easy Credit</title>
+        <title> Complaint: Manage Complaint | Easy Credit</title>
       </Head>
 
       <Container maxWidth={themeStretch ? false : 'xl'}>
         <CustomBreadcrumbs
-          heading="Loan Applications"
+          heading="Manage Complaint Category"
           links={[
             { name: 'Dashboard', href: PATH_DASHBOARD.root },
             {
-              name: 'Loan',
-              href: '',
+              name: 'Complaint',
+              href: PATH_DASHBOARD.complaint.root,
             },
-            { name: 'Loan Applications' },
+            { name: 'Complaint Category' },
           ]}
-          // Removed action prop here
         />
-        
-        <Grid container spacing={3}>
-            {/* ... BookingWidgetSummary components ... */}
-            <Grid item xs={12} md={4}>
-              <BookingWidgetSummary image="/assets/icons/payments/loanicon.webp" title="Awaiting Disbursement" total={loanstat?.awaitingDisbursement ? loanstat.awaitingDisbursement : '0'} icon={<BookingIllustration />} />
-            </Grid>
-
-            <Grid item xs={12} md={4}>
-              <BookingWidgetSummary image="/assets/icons/payments/loanicon.webp" title="Pending Approval" total={loanstat?.pendingApproval ? loanstat.pendingApproval : '0'} icon={<BookingIllustration />} />
-            </Grid>
-
-            <Grid item xs={12} md={4}>
-              <BookingWidgetSummary image="/assets/icons/payments/loanicon.webp" title="Rejected" total={loanstat?.rejected ? loanstat.rejected : '0'} icon={<BookingIllustration />} />
-            </Grid>
-
-            <Grid item xs={12} md={4}>
-              <BookingWidgetSummary image="/assets/icons/payments/loanicon.webp" title="Closed" total={loanstat?.closed ? loanstat.closed : '0'} icon={<BookingIllustration />} />
-            </Grid>
-
-            <Grid item xs={12} md={4}>
-              <BookingWidgetSummary image="/assets/icons/payments/loanicon.webp" title="Active" total={loanstat?.active ? loanstat.active : '0'} icon={<BookingIllustration />} />
-            </Grid>
-
-            <Grid item xs={12} md={4}>
-              <BookingWidgetSummary image="/assets/icons/payments/loanicon.webp" title="Check Out" total={loanstat?.defaulted ? loanstat.defaulted : '0'} icon={<BookingIllustration />} />
-            </Grid>
-        </Grid>
-          <br/>
 
         <Card>
-          {/* 1. Existing Toolbar */}
           <ProductTableToolbar
             filterName={filterName}
-            filterStatus={filterStatus}
             onFilterName={handleFilterName}
-            onFilterStatus={handleFilterStatus}
-            statusOptions={STATUS_OPTIONS}
             isFiltered={isFiltered}
             onResetFilter={handleResetFilter}
+            // Removed filterStatus, onFilterStatus, and statusOptions props
           />
 
-          {/* 2. 💡 Export Buttons placed right after the toolbar */}
           <Stack 
               direction="row" 
               spacing={1} 
@@ -419,35 +310,17 @@ export default function LoanListPage() {
                   Export XLS
               </Button>
           </Stack>
-          {/* END OF EXPORT BUTTONS */}
-          
-          <TableContainer sx={{ position: 'relative', overflow: 'unset' }}>
-            <TableSelectedAction
-              dense={dense}
-              numSelected={selected.length}
-              rowCount={tableData.length}
-              onSelectAllRows={(checked) =>
-                onSelectAllRows(
-                  checked,
-                  tableData.map((row) => row._id) 
-                )
-              }
-              action={
-                <Tooltip title="Delete">
-                  <IconButton color="primary" onClick={handleOpenConfirm}>
-                    <Iconify icon="eva:trash-2-outline" />
-                  </IconButton>
-                </Tooltip>
-              }
-            />
 
+
+          <TableContainer sx={{ position: 'relative', overflow: 'unset' }}>
+            
             <Scrollbar>
               <Table size={dense ? 'small' : 'medium'} sx={{ minWidth: 960 }}>
                 <TableHeadCustom
                   order={order}
                   orderBy={orderBy}
                   headLabel={TABLE_HEAD}
-                  rowCount={tableData.length}
+                  rowCount={dataFiltered.length} // Use dataFiltered length here
                   numSelected={selected.length}
                   onSort={onSort} 
                 />
@@ -458,11 +331,10 @@ export default function LoanListPage() {
                     .map((row, index) =>
                       row ? (
                         <ProductTableRow
-                          key={row?._id}
-                          row={row}
-                          selected={selected.includes(row?._id)}
-                          onSelectRow={() => onSelectRow(row?._id)}
-                          onViewRow={() => handleViewRow(row?._id)}
+                          key={row._id}
+                          row={row as any} // Use 'any' or check if ProductTableRow accepts ICustomerItem
+                          selected={selected.includes(row._id)}
+                          // Assuming there's no onSelectRow needed for categories
                         />
                       ) : (
                         !isNotFound && <TableSkeleton key={index} sx={{ height: denseHeight }} />
@@ -471,7 +343,7 @@ export default function LoanListPage() {
 
                   <TableEmptyRows
                     height={denseHeight}
-                    emptyRows={emptyRows(page, rowsPerPage, tableData.length)}
+                    emptyRows={emptyRows(page, rowsPerPage, dataFiltered.length)}
                   />
 
                   <TableNoData isNotFound={isNotFound} />
@@ -503,13 +375,11 @@ function applyFilter({
   inputData,
   comparator,
   filterName,
-  filterStatus,
 }: {
-  inputData: ILoanItem[]; 
+  inputData: ICustomerItem[];
   comparator: (a: any, b: any) => number;
   filterName: string;
-  filterStatus: string[];
-}) {
+}): ICustomerItem[] {
   const stabilizedThis = inputData.map((el, index) => [el, index] as const);
 
   stabilizedThis.sort((a, b) => {
@@ -518,17 +388,13 @@ function applyFilter({
     return a[1] - b[1];
   });
 
-  inputData = stabilizedThis.map((el) => el[0]);
+  let filteredData: ICustomerItem[] = stabilizedThis.map((el) => el[0]);
 
   if (filterName) {
-    inputData = inputData.filter(
-      (product) => product.userId.toLowerCase().includes(filterName.toLowerCase())
+    filteredData = filteredData.filter(
+      (product) => product.text.toLowerCase().includes(filterName.toLowerCase())
     );
   }
 
-  if (filterStatus.length) {
-    inputData = inputData.filter((product) => filterStatus.includes(product.status));
-  }
-
-  return inputData;
+  return filteredData;
 }

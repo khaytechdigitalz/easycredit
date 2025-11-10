@@ -8,16 +8,14 @@ import {
   Table,
   TableBody,
   Container,
-  Grid,
   TableContainer,
   Button,
   Stack,
 } from '@mui/material';
-import { SelectChangeEvent } from '@mui/material/Select';
 // redux
 import axios from '../../../utils/axios';
 import { useSelector } from '../../../redux/store';
- // routes
+// routes
 import { PATH_DASHBOARD } from '../../../routes/paths';
 // layouts
 import DashboardLayout from '../../../layouts/dashboard';
@@ -31,64 +29,47 @@ import {
   TableSkeleton,
   TableEmptyRows,
   TableHeadCustom,
-  TableSelectedAction,
   TablePaginationCustom,
 } from '../../../components/table';
+import Iconify from '../../../components/iconify';
+import { useSnackbar } from '../../../components/snackbar';
 import Scrollbar from '../../../components/scrollbar';
 import CustomBreadcrumbs from '../../../components/custom-breadcrumbs';
-import Iconify from '../../../components/iconify';
-import { useSnackbar } from '../../../components/snackbar'; 
 // sections
-import { ProductTableRow, ProductTableToolbar } from '../../../sections/@dashboard/bills/list';
+import { ProductTableRow } from '../../../sections/@dashboard/faq/list';
+// types
+import { IProductState } from '../../../@types/product'; 
 
-
-import { 
-  BookingWidgetSummary, 
-} from '../../../sections/@dashboard/bills/stat';
-// assets
-import {
-  BookingIllustration, 
-} from '../../../assets/illustrations';
 // ----------------------------------------------------------------------
-// Define the specific structure of the data row based on your table
-export interface IBillItem {
+// Define the specific structure of the data row (Complaint Category)
+export interface ICustomerItem {
   _id: string; 
-  date: string; 
-  userId: string;
-  billId: string;
-  serviceType: string;
-  recipient: string | number; 
-  provider: string;
-  amount: number;
-  status: string;
+  text: string; 
+  // Add other fields present in the API response that correspond to the table headers
 }
 
-// Corrected TABLE_HEAD with distinct IDs for proper sorting/export mapping
-const TABLE_HEAD = [
-  { id: 'date', label: 'Date', align: 'left' }, 
-  { id: 'userId', label: 'User ID', align: 'left' },
-  { id: 'billId', label: 'Bill ID', align: 'left' },
-  { id: 'serviceType', label: 'Service Type', align: 'left' },
-  { id: 'recipient', label: 'Recipient', align: 'left' },
-  { id: 'provider', label: 'Provider', align: 'left' },
-  { id: 'amount', label: 'Amount', align: 'left' },
-  { id: 'status', label: 'Status', align: 'left' },
-];
+// Define the structure for your table header
+interface HeadLabel {
+  id: keyof ICustomerItem | 'actions' | string;
+  label: string;
+  align?: 'left' | 'center' | 'right';
+}
 
-const STATUS_OPTIONS = [
-  { value: 'success', label: 'Successful' },
-  { value: 'failed', label: 'Failed' },
+const TABLE_HEAD: HeadLabel[] = [
+  { id: '_id', label: 'ID'  },
+  { id: 'title', label: 'Title'  },
+  { id: 'content', label: 'Content'  },
 ];
-
+ 
 // ----------------------------------------------------------------------
 
-BillsPage.getLayout = (page: React.ReactElement) => (
+CustomerListPage.getLayout = (page: React.ReactElement) => (
   <DashboardLayout>{page}</DashboardLayout>
 );
 
 // ----------------------------------------------------------------------
 
-export default function BillsPage() {
+export default function CustomerListPage() {
   const { enqueueSnackbar } = useSnackbar();
 
   const {
@@ -97,43 +78,30 @@ export default function BillsPage() {
     order,
     orderBy,
     rowsPerPage,
-    setPage,
     //
     selected,
-    onSelectRow,
-    onSelectAllRows,
-    //
+     //
     onSort,
     onChangeDense,
     onChangePage,
     onChangeRowsPerPage,
   } = useTable({
-    defaultOrderBy: 'date',
+    defaultOrderBy: 'createdAt',
   });
 
   const { themeStretch } = useSettingsContext();
 
+  // Assuming product slice has an isLoading state
+  const { isLoading } = useSelector((state) => state.product as IProductState); 
 
-  const { isLoading } = useSelector((state) => state.product);
+  const [tableData, setTableData] = useState<ICustomerItem[]>([]);
 
-  const [tableData, setTableData] = useState<IBillItem[]>([]);
+  const [filterName] = useState('');
 
-  const [filterName, setFilterName] = useState('');
-
-  const [filterStatus, setFilterStatus] = useState<string[]>([]);
-  
-  // 💡 FIX 1: Access window safely
-  const queryString = typeof window !== 'undefined' ? window.location.search : '';
-  const params = new URLSearchParams(queryString);
-  const typeValue = params.get('type'); 
-  
-  const [responselog, setDashlog] = useState<any>(null);
+  const [responselog, setDashlog] = useState<ICustomerItem[] | null>(null); 
 
   useEffect(() => {
     const fetchDashboardData = async () => {
-      // 💡 FIX 2: Guard clause - Only run fetch if typeValue is truthy
-      // if (!typeValue) return; 
-
       try {
         const accessToken = localStorage.getItem('accessToken');
         const config = {
@@ -141,77 +109,43 @@ export default function BillsPage() {
             'Authorization': `Bearer ${accessToken}`
           }
         }; 
+
+        const requestResponse = await axios.get('/admin/faqs', config);
         
-        const apiResponse = await axios.get(`/admin/bill/history/${typeValue}`, config);
-        setDashlog(apiResponse.data);
+        if (requestResponse.data && requestResponse.data.data && Array.isArray(requestResponse.data.data.data)) {
+            setDashlog(requestResponse.data.data.data as ICustomerItem[]);
+        } else {
+            setDashlog([]);
+        }
+        
       } catch (error) {
-        console.error("API Call Error:", error);
+        console.error("Error fetching faq:", error);
+        enqueueSnackbar('Failed to fetch faq.', { variant: 'error' });
+        setDashlog([]); 
       }
     };
 
     fetchDashboardData();
-  }, [typeValue]); 
- 
-  
+  }, [enqueueSnackbar]); 
+
   useEffect(() => {
-  const dataFromApi = responselog?.data?.data;
-
-  const processData = (data: any[] | Record<string, any>) => {
-    const finalArray: any[] = Array.isArray(data) ? data : Object.values(data || {});
-
-    const isValidBillArray = finalArray.every(item => 
-      item && 
-      typeof item === 'object' && 
-      '_id' in item 
-    );
-      
-    if (isValidBillArray) {
-        setTableData(finalArray as IBillItem[]);
-    } else {
-        setTableData([]);
+    if (responselog && Array.isArray(responselog)) {
+      setTableData(responselog);
     }
-  };
+  }, [responselog]);
 
-  if (dataFromApi) {
-    processData(dataFromApi);
-  } else if (Array.isArray(responselog)) {
-    processData(responselog);
-  }
-}, [responselog]);
-
-
-  
   const dataFiltered = useMemo(() => applyFilter({
     inputData: tableData,
     comparator: getComparator(order, orderBy),
     filterName,
-    filterStatus,
-  }), [tableData, order, orderBy, filterName, filterStatus]);
+  }), [tableData, order, orderBy, filterName]);
 
 
   const denseHeight = dense ? 60 : 80;
 
-  const isFiltered = filterName !== '' || !!filterStatus.length;
 
   const isNotFound = (!dataFiltered.length && !!filterName) || (!isLoading && !dataFiltered.length);
- 
-  const handleFilterName = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setPage(0);
-    setFilterName(event.target.value);
-  };
-
-  const handleFilterStatus = (event: SelectChangeEvent<string[]>) => {
-    const {
-      target: { value },
-    } = event;
-    setPage(0);
-    setFilterStatus(typeof value === 'string' ? value.split(',') : value);
-  };
   
-  const handleResetFilter = () => {
-    setFilterName('');
-    setFilterStatus([]);
-  };
 
   // ----------------------------------------------------------------------
   // 💾 CSV Export Function
@@ -222,23 +156,21 @@ export default function BillsPage() {
         return;
     }
     
+    // 1. Prepare Headers (Exclude the last item which is the action column)
     const headers = TABLE_HEAD
+        .slice(0, -1)
         .map(head => head.label)
         .join(',');
 
+    // 2. Prepare Data Rows
     const csvRows = dataFiltered.map((row) => {
-        const rowData = row as IBillItem;
+        const rowData: ICustomerItem = row; 
         const values = [
-            rowData.date, 
-            rowData.userId, 
-            rowData.billId, 
-            rowData.serviceType, 
-            rowData.recipient, 
-            rowData.provider, 
-            rowData.amount, 
-            rowData.status,
+            rowData._id, 
+            rowData.text, 
         ].map(value => {
             const stringValue = String(value);
+            // Enclose in double quotes if the string contains a comma
             if (stringValue.includes(',')) {
                 return `"${stringValue}"`;
             }
@@ -254,7 +186,7 @@ export default function BillsPage() {
     
     const link = document.createElement('a');
     link.setAttribute('href', url);
-    link.setAttribute('download', `${typeValue || 'all'}_bills_log.csv`);
+    link.setAttribute('download', 'faq_list.csv');
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -272,19 +204,14 @@ export default function BillsPage() {
         return;
     }
 
-    const headers = TABLE_HEAD.map(head => `<th>${head.label}</th>`).join('');
+    // Excludes the last item which is the action column
+    const headers = TABLE_HEAD.slice(0, -1).map(head => `<th>${head.label}</th>`).join('');
     
     const tableRows = dataFiltered.map((row) => {
-      const rowData = row as IBillItem;
+      const rowData: ICustomerItem = row; 
       const rowValues = [
-          rowData.date, 
-          rowData.userId, 
-          rowData.billId, 
-          rowData.serviceType, 
-          rowData.recipient, 
-          rowData.provider, 
-          rowData.amount, 
-          rowData.status,
+          rowData._id, 
+          rowData.text,  
       ].map(value => `<td>${value}</td>`).join('');
       
       return `<tr>${rowValues}</tr>`;
@@ -313,7 +240,7 @@ export default function BillsPage() {
     
     const link = document.createElement('a');
     link.setAttribute('href', url);
-    link.setAttribute('download', `${typeValue || 'all'}_bills_log.xls`);
+    link.setAttribute('download', 'faq_list.xls');
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -321,49 +248,29 @@ export default function BillsPage() {
     enqueueSnackbar('Excel exported successfully!', { variant: 'success' });
   };
 
+
   return (
     <>
       <Head>
-        <title> Bills: Bills Payment Log | Easy Credit</title>
+        <title> FAQ: Manage FAQ | Easy Credit</title>
       </Head>
 
       <Container maxWidth={themeStretch ? false : 'xl'}>
         <CustomBreadcrumbs
-          heading={
-            `${typeValue ? `${typeValue.charAt(0).toUpperCase()}${typeValue.slice(1)} ` : ''}Bills Payment Log`
-          }
+          heading="Manage FAQs"
           links={[
             { name: 'Dashboard', href: PATH_DASHBOARD.root },
             {
-              name: 'Bills',
-              href: '',
+              name: 'FAQ',
+              href: PATH_DASHBOARD.faq.root,
             },
-            { name: 'Payment Log' },
+            { name: 'FAQ' },
           ]}
         />
-        
-        <Grid container spacing={3}>
-
-            <Grid item xs={12} md={12}>
-              <BookingWidgetSummary image="/assets/icons/payments/cart.png" title="Total Bills Payment" total={responselog?.data ? responselog.data.total : '0'} icon={<BookingIllustration />} />
-            </Grid>
- 
-        </Grid>
-          <br/>
 
         <Card>
-          {/* 1. Existing Toolbar */}
-          <ProductTableToolbar
-            filterName={filterName}
-            filterStatus={filterStatus}
-            onFilterName={handleFilterName}
-            onFilterStatus={handleFilterStatus}
-            statusOptions={STATUS_OPTIONS}
-            isFiltered={isFiltered}
-            onResetFilter={handleResetFilter}
-          />
+         
 
-          {/* 2. 💡 Export Buttons placed right after the toolbar */}
           <Stack 
               direction="row" 
               spacing={1} 
@@ -387,28 +294,17 @@ export default function BillsPage() {
                   Export XLS
               </Button>
           </Stack>
-          {/* END OF EXPORT BUTTONS */}
+
 
           <TableContainer sx={{ position: 'relative', overflow: 'unset' }}>
-            <TableSelectedAction
-              dense={dense}
-              numSelected={selected.length}
-              rowCount={tableData.length}
-              onSelectAllRows={(checked) =>
-                onSelectAllRows(
-                  checked,
-                  tableData.map((row) => row._id) 
-                )
-              } 
-            />
-
+            
             <Scrollbar>
               <Table size={dense ? 'small' : 'medium'} sx={{ minWidth: 960 }}>
                 <TableHeadCustom
                   order={order}
                   orderBy={orderBy}
                   headLabel={TABLE_HEAD}
-                  rowCount={tableData.length}
+                  rowCount={dataFiltered.length} // Use dataFiltered length here
                   numSelected={selected.length}
                   onSort={onSort} 
                 />
@@ -419,11 +315,11 @@ export default function BillsPage() {
                     .map((row, index) =>
                       row ? (
                         <ProductTableRow
-                          key={row?._id}
-                          row={row} 
-                          selected={selected.includes(row?._id)}
-                          onSelectRow={() => onSelectRow(row?._id)}
-                         />
+                          key={row._id}
+                          row={row as any} // Use 'any' or check if ProductTableRow accepts ICustomerItem
+                          selected={selected.includes(row._id)}
+                          // Assuming there's no onSelectRow needed for categories
+                        />
                       ) : (
                         !isNotFound && <TableSkeleton key={index} sx={{ height: denseHeight }} />
                       )
@@ -431,7 +327,7 @@ export default function BillsPage() {
 
                   <TableEmptyRows
                     height={denseHeight}
-                    emptyRows={emptyRows(page, rowsPerPage, tableData.length)}
+                    emptyRows={emptyRows(page, rowsPerPage, dataFiltered.length)}
                   />
 
                   <TableNoData isNotFound={isNotFound} />
@@ -463,13 +359,11 @@ function applyFilter({
   inputData,
   comparator,
   filterName,
-  filterStatus,
 }: {
-  inputData: IBillItem[]; 
+  inputData: ICustomerItem[];
   comparator: (a: any, b: any) => number;
   filterName: string;
-  filterStatus: string[];
-}) {
+}): ICustomerItem[] {
   const stabilizedThis = inputData.map((el, index) => [el, index] as const);
 
   stabilizedThis.sort((a, b) => {
@@ -478,18 +372,13 @@ function applyFilter({
     return a[1] - b[1];
   });
 
-  inputData = stabilizedThis.map((el) => el[0]);
+  let filteredData: ICustomerItem[] = stabilizedThis.map((el) => el[0]);
 
   if (filterName) {
-    inputData = inputData.filter(
-      (product) => product.userId.toLowerCase().includes(filterName.toLowerCase()) || 
-                   product.billId.toLowerCase().includes(filterName.toLowerCase())
+    filteredData = filteredData.filter(
+      (product) => product.text.toLowerCase().includes(filterName.toLowerCase())
     );
   }
 
-  if (filterStatus.length) {
-    inputData = inputData.filter((product) => filterStatus.includes(product.status));
-  }
-
-  return inputData;
+  return filteredData;
 }

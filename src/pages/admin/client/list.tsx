@@ -1,5 +1,5 @@
 import { paramCase } from 'change-case';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react'; // Added useMemo
 // next
 import Head from 'next/head';
 import { useRouter } from 'next/router';
@@ -8,11 +8,11 @@ import { useRouter } from 'next/router';
 import {
   Card,
   Table,
-  Tooltip,
   TableBody,
   Container,
-  IconButton,
   TableContainer,
+  Button, // Added Button
+  Stack, // Added Stack
 } from '@mui/material';
 import { SelectChangeEvent } from '@mui/material/Select';
 // redux
@@ -20,8 +20,6 @@ import axios from '../../../utils/axios';
 import { useSelector } from '../../../redux/store';
 // routes
 import { PATH_DASHBOARD } from '../../../routes/paths';
-// @types
-import { IProduct } from '../../../@types/product';
 // layouts
 import DashboardLayout from '../../../layouts/dashboard';
 // components
@@ -34,43 +32,58 @@ import {
   TableSkeleton,
   TableEmptyRows,
   TableHeadCustom,
-  TableSelectedAction,
   TablePaginationCustom,
 } from '../../../components/table';
-import Iconify from '../../../components/iconify';
+import Iconify from '../../../components/iconify'; // Assuming Iconify is available
+import { useSnackbar } from '../../../components/snackbar'; // Added Snackbar
 import Scrollbar from '../../../components/scrollbar';
 import CustomBreadcrumbs from '../../../components/custom-breadcrumbs';
 // sections
 import { ProductTableRow, ProductTableToolbar } from '../../../sections/@dashboard/users/list';
 
 // ----------------------------------------------------------------------
+// Define the specific structure of the data row based on your table headers
+export interface ICustomerItem {
+  _id: string; 
+  firstName: string; 
+  lastName: string;
+  gender: string;
+  email: string;
+  phone: string;
+  nationality: string;
+  phoneVerificationStatus: 'verified' | 'unverified'; // Assuming a status field exists
+  // Add other fields present in the API response that correspond to the table headers
+}
+
 
 const TABLE_HEAD = [
-  { id: 'name', label: 'ID', align: 'left' },
-  { id: 'name', label: 'First Name', align: 'left' },
-  { id: 'name', label: 'Last Name', align: 'left' },
-  { id: 'name', label: 'Gender', align: 'left' },
-  { id: 'name', label: 'Email', align: 'left' },
-  { id: 'name', label: 'Phone', align: 'left' },
-  { id: 'name', label: 'Nationality', align: 'left' }, 
-  { id: 'name', label: 'Phone Verification Status', align: 'left' }, 
-  { id: '' },
+  { id: '_id', label: 'ID', align: 'left' },
+  { id: 'firstName', label: 'First Name', align: 'left' },
+  { id: 'lastName', label: 'Last Name', align: 'left' },
+  { id: 'gender', label: 'Gender', align: 'left' },
+  { id: 'email', label: 'Email', align: 'left' },
+  { id: 'phone', label: 'Phone', align: 'left' },
+  { id: 'nationality', label: 'Nationality', align: 'left' }, 
+  { id: 'phoneVerificationStatus', label: 'Phone Verification Status', align: 'left' }, 
+  { id: '' }, // Empty ID for the action column
 ];
 
 const STATUS_OPTIONS = [
-  { value: 'paid', label: 'Paid' },
-  { value: 'pending', label: 'Pending' },
+  { value: 'verified', label: 'Verified' },
+  { value: 'unverified', label: 'Unverified' },
 ];
 
 // ----------------------------------------------------------------------
 
-EcommerceProductListPage.getLayout = (page: React.ReactElement) => (
+CustomerListPage.getLayout = (page: React.ReactElement) => (
   <DashboardLayout>{page}</DashboardLayout>
 );
 
 // ----------------------------------------------------------------------
 
-export default function EcommerceProductListPage() {
+export default function CustomerListPage() {
+  const { enqueueSnackbar } = useSnackbar();
+
   const {
     dense,
     page,
@@ -80,8 +93,6 @@ export default function EcommerceProductListPage() {
     setPage,
     //
     selected,
-    onSelectRow,
-    onSelectAllRows,
     //
     onSort,
     onChangeDense,
@@ -97,7 +108,7 @@ export default function EcommerceProductListPage() {
 
   const { isLoading } = useSelector((state) => state.product);
 
-  const [tableData, setTableData] = useState<IProduct[]>([]);
+  const [tableData, setTableData] = useState<ICustomerItem[]>([]);
 
   const [filterName, setFilterName] = useState('');
 
@@ -130,16 +141,16 @@ export default function EcommerceProductListPage() {
  
   useEffect(() => {
     if (responselog?.length) {
-      setTableData(responselog);
+      setTableData(responselog as ICustomerItem[]);
     }
   }, [responselog]);
 
-  const dataFiltered = applyFilter({
+  const dataFiltered = useMemo(() => applyFilter({
     inputData: tableData,
     comparator: getComparator(order, orderBy),
     filterName,
     filterStatus,
-  });
+  }), [tableData, order, orderBy, filterName, filterStatus]);
 
 
   const denseHeight = dense ? 60 : 80;
@@ -147,9 +158,6 @@ export default function EcommerceProductListPage() {
   const isFiltered = filterName !== '' || !!filterStatus.length;
 
   const isNotFound = (!dataFiltered.length && !!filterName) || (!isLoading && !dataFiltered.length);
-
-  const handleOpenConfirm = () => {
-  };
  
   const handleFilterName = (event: React.ChangeEvent<HTMLInputElement>) => {
     setPage(0);
@@ -174,6 +182,118 @@ export default function EcommerceProductListPage() {
     setFilterStatus([]);
   };
 
+  // ----------------------------------------------------------------------
+  // 💾 CSV Export Function
+  // ----------------------------------------------------------------------
+  const exportToCsv = () => {
+    if (!dataFiltered || dataFiltered.length === 0) {
+        enqueueSnackbar('No data to export.', { variant: 'warning' });
+        return;
+    }
+    
+    // 1. Prepare Headers (Exclude the last item which is the action column)
+    const headers = TABLE_HEAD
+        .slice(0, -1)
+        .map(head => head.label)
+        .join(',');
+
+    // 2. Prepare Data Rows
+    const csvRows = dataFiltered.map((row) => {
+        const rowData = row as ICustomerItem;
+        const values = [
+            rowData._id, 
+            rowData.firstName, 
+            rowData.lastName, 
+            rowData.gender, 
+            rowData.email, 
+            rowData.phone, 
+            rowData.nationality, 
+            rowData.phoneVerificationStatus,
+        ].map(value => {
+            const stringValue = String(value);
+            if (stringValue.includes(',')) {
+                return `"${stringValue}"`;
+            }
+            return stringValue;
+        }).join(',');
+        
+        return values;
+    });
+
+    const csvContent = [headers, ...csvRows].join('\n');
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'customer_list.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    enqueueSnackbar('CSV exported successfully!', { variant: 'success' });
+  };
+
+
+  // ----------------------------------------------------------------------
+  // 📊 Excel Export Function
+  // ----------------------------------------------------------------------
+  const exportToExcel = () => {
+    if (!dataFiltered || dataFiltered.length === 0) {
+        enqueueSnackbar('No data to export.', { variant: 'warning' });
+        return;
+    }
+
+    const headers = TABLE_HEAD.slice(0, -1).map(head => `<th>${head.label}</th>`).join('');
+    
+    const tableRows = dataFiltered.map((row) => {
+      const rowData = row as ICustomerItem;
+      const rowValues = [
+          rowData._id, 
+          rowData.firstName, 
+          rowData.lastName, 
+          rowData.gender, 
+          rowData.email, 
+          rowData.phone, 
+          rowData.nationality, 
+          rowData.phoneVerificationStatus,
+      ].map(value => `<td>${value}</td>`).join('');
+      
+      return `<tr>${rowValues}</tr>`;
+    }).join('');
+
+    const tableHTML = `
+      <table>
+        <thead><tr>${headers}</tr></thead>
+        <tbody>${tableRows}</tbody>
+      </table>
+    `;
+
+    const excelContent = `
+      <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+      <head>
+          <meta charset="utf-8">
+          </head>
+      <body>
+        ${tableHTML}
+      </body>
+      </html>
+    `;
+    
+    const blob = new Blob([excelContent], { type: 'application/vnd.ms-excel' });
+    const url = URL.createObjectURL(blob);
+    
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', 'customer_list.xls');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    enqueueSnackbar('Excel exported successfully!', { variant: 'success' });
+  };
+
+
   return (
     <>
       <Head>
@@ -194,6 +314,7 @@ export default function EcommerceProductListPage() {
         />
 
         <Card>
+          {/* 1. Existing Toolbar */}
           <ProductTableToolbar
             filterName={filterName}
             filterStatus={filterStatus}
@@ -204,26 +325,35 @@ export default function EcommerceProductListPage() {
             onResetFilter={handleResetFilter}
           />
 
-          <TableContainer sx={{ position: 'relative', overflow: 'unset' }}>
-            <TableSelectedAction
-              dense={dense}
-              numSelected={selected.length}
-              rowCount={tableData.length}
-              onSelectAllRows={(checked) =>
-                onSelectAllRows(
-                  checked,
-                  tableData.map((row) => row.id)
-                )
-              }
-              action={
-                <Tooltip title="Delete">
-                  <IconButton color="primary" onClick={handleOpenConfirm}>
-                    <Iconify icon="eva:trash-2-outline" />
-                  </IconButton>
-                </Tooltip>
-              }
-            />
+          {/* 2. 💡 Export Buttons placed right after the toolbar */}
+          <Stack 
+              direction="row" 
+              spacing={1} 
+              justifyContent="flex-end"
+              sx={{ p: 1.5, pr: 3, pt: 0 }} 
+          >
+              <Button
+                  variant="outlined"
+                  onClick={exportToCsv}
+                  startIcon={<Iconify icon="eva:file-text-fill" />}
+                  disabled={!dataFiltered.length}
+              >
+                  Export CSV
+              </Button>
+              <Button
+                  variant="contained"
+                  onClick={exportToExcel}
+                  startIcon={<Iconify icon="eva:cloud-download-fill" />}
+                  disabled={!dataFiltered.length}
+              >
+                  Export XLS
+              </Button>
+          </Stack>
+          {/* END OF EXPORT BUTTONS */}
 
+
+          <TableContainer sx={{ position: 'relative', overflow: 'unset' }}>
+            
             <Scrollbar>
               <Table size={dense ? 'small' : 'medium'} sx={{ minWidth: 960 }}>
                 <TableHeadCustom
@@ -232,13 +362,7 @@ export default function EcommerceProductListPage() {
                   headLabel={TABLE_HEAD}
                   rowCount={tableData.length}
                   numSelected={selected.length}
-                  onSort={onSort}
-                  onSelectAllRows={(checked) =>
-                    onSelectAllRows(
-                      checked,
-                      tableData.map((row) => row._id)
-                    )
-                  }
+                  onSort={onSort} 
                 />
 
                 <TableBody>
@@ -250,7 +374,6 @@ export default function EcommerceProductListPage() {
                           key={row._id}
                           row={row}
                           selected={selected.includes(row._id)}
-                          onSelectRow={() => onSelectRow(row._id)}
                           onViewRow={() => handleViewRow(row._id)}
                         />
                       ) : (
@@ -294,7 +417,7 @@ function applyFilter({
   filterName,
   filterStatus,
 }: {
-  inputData: IProduct[];
+  inputData: ICustomerItem[]; // Using the specific Customer Item type
   comparator: (a: any, b: any) => number;
   filterName: string;
   filterStatus: string[];
@@ -310,13 +433,17 @@ function applyFilter({
   inputData = stabilizedThis.map((el) => el[0]);
 
   if (filterName) {
+    // Assuming filtering primarily by first name, last name, or ID/Email
     inputData = inputData.filter(
-      (product) => product.userId.toLowerCase().indexOf(filterName.toLowerCase()) !== -1
+      (product) => product.firstName.toLowerCase().includes(filterName.toLowerCase()) ||
+                   product.lastName.toLowerCase().includes(filterName.toLowerCase()) ||
+                   product.email.toLowerCase().includes(filterName.toLowerCase())
     );
   }
 
   if (filterStatus.length) {
-    inputData = inputData.filter((product) => filterStatus.includes(product.inventoryType));
+    // Assuming filterStatus applies to phoneVerificationStatus
+    inputData = inputData.filter((product) => filterStatus.includes(product.phoneVerificationStatus));
   }
 
   return inputData;

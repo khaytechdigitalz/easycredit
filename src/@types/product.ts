@@ -15,6 +15,9 @@ export type IProduct = {
   _id: string;
   id: string;
   cover: string;
+  text: string;
+  content: string;
+  title: string;
   images: string[];
   name: string;
   price: number;

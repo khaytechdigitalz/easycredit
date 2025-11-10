@@ -3,7 +3,6 @@ import { useState } from 'react';
 import {
   Stack,
   TableRow,
-  Checkbox,
   MenuItem,
   TableCell,
   IconButton,
@@ -22,13 +21,11 @@ type Props = {
   row: IProduct;
   selected: boolean;
    onViewRow: VoidFunction;
-  onSelectRow: VoidFunction;
 };
 
 export default function ProductTableRow({
   row,
   selected,
-  onSelectRow,
    onViewRow,
 }: Props) {
   const { _id, first_name, last_name, gender, email, phone, phoneVerified,nationality } = row;
@@ -46,10 +43,7 @@ export default function ProductTableRow({
   return (
     <>
       <TableRow hover selected={selected}>
-        <TableCell padding="checkbox">
-          <Checkbox checked={selected} onClick={onSelectRow} />
-        </TableCell>
-
+      
         <TableCell>
           <Stack direction="row" alignItems="center" spacing={2}>
               {_id} 

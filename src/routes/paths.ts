@@ -72,8 +72,10 @@ export const PATH_DASHBOARD = {
     root: path(ROOTS_DASHBOARD, '/loan'),
     applications: path(ROOTS_ADMIN, '/loan/applications'),
     view: (id: string) =>  path(ROOTS_ADMIN, `/loan/${id}`),
-
     product: path(ROOTS_ADMIN, '/loan/product'),
+    purpose: path(ROOTS_ADMIN, '/loan/purpose'),
+    purpose_create: path(ROOTS_ADMIN, '/loan/purpose_create'),
+
     create_product: path(ROOTS_ADMIN, '/loan/create_product'),
     loans: path(ROOTS_ADMIN, '/loan/loans'),
     create_new_loan: path(ROOTS_ADMIN, '/loan/create_loan'),
@@ -96,8 +98,21 @@ export const PATH_DASHBOARD = {
     create: path(ROOTS_ADMIN, '/branch/create'),
   },
 
+  complaint: {
+    root: path(ROOTS_DASHBOARD, '/complaint'),
+    list: path(ROOTS_ADMIN, '/complaint/list'),
+    create: path(ROOTS_ADMIN, '/complaint/create'),
+  },
+
+  faq: {
+    root: path(ROOTS_DASHBOARD, '/faq'),
+    list: path(ROOTS_ADMIN, '/faq/list'),
+    create: path(ROOTS_ADMIN, '/faq/create'),
+  },
+
+
   client: {
-    root: path(ROOTS_DASHBOARD, '/client'),
+    root: path(ROOTS_DASHBOARD, '/client/'),
     list: path(ROOTS_ADMIN, '/client/list'),
     view: (id: string) =>  path(ROOTS_ADMIN, `/client/${id}`),
     create: path(ROOTS_ADMIN, '/client/create'),

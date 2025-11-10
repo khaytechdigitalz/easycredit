@@ -60,8 +60,7 @@ export default function ProductTableRow({
               {_id} 
           </Stack>
         </TableCell>
-
-        <TableCell align="left">{userId}</TableCell>
+ 
         <TableCell align="left">₦{fCurrency(amount)}</TableCell>
         <TableCell align="left">{term} Days</TableCell>
         <TableCell align="left">{purpose}</TableCell>
@@ -71,6 +70,7 @@ export default function ProductTableRow({
             variant="soft"
             color={
               (status === 'paid' && 'success') ||
+              (status === 'active' && 'info') ||
               (status === 'pending' && 'warning') ||
               'error'
             }

@@ -36,14 +36,13 @@ import Scrollbar from '../../../../components/scrollbar';
 
 // FIX: Corrected 'id' fields to match potential loan data properties for sorting
 const TABLE_HEAD = [
+  { id: 'date', label: 'Date', align: 'left' }, 
   { id: '_id', label: 'ID', align: 'left' }, // Should be '_id' for sorting by ID
-  { id: 'userId', label: 'User ID', align: 'left' }, 
   { id: 'amount', label: 'Amount', align: 'left' },
   { id: 'term', label: 'Term', align: 'left' },
   { id: 'purpose', label: 'Purpose', align: 'left' },
   { id: 'interestRate', label: 'Interest Rate', align: 'left' },
   { id: 'status', label: 'Status', align: 'left' },
-  { id: 'createdAt', label: 'Date', align: 'left' }, 
   { id: '' }, // Placeholder for actions/menu, which should not have an ID for sorting
 ];
 
@@ -63,7 +62,6 @@ const {
     //
     selected,
     onSelectRow,
-    onSelectAllRows,
     //
     onSort,
     onChangeDense,
@@ -221,13 +219,7 @@ const {
                   headLabel={TABLE_HEAD}
                   rowCount={tableData.length}
                   numSelected={selected.length}
-                  onSort={onSort}
-                  onSelectAllRows={(checked) =>
-                    onSelectAllRows(
-                      checked,
-                      tableData.map((row) => row._id)
-                    )
-                  }
+                  onSort={onSort} 
                 />
 
                 <TableBody>

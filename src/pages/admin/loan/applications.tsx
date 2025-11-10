@@ -358,27 +358,27 @@ export default function LoanListPage() {
         <Grid container spacing={3}>
             {/* ... BookingWidgetSummary components ... */}
             <Grid item xs={12} md={4}>
-              <BookingWidgetSummary image="/assets/icons/payments/loanicon.webp" title="Awaiting Disbursement" total={loanstat?.awaitingDisbursement ? loanstat.awaitingDisbursement : '0'} icon={<BookingIllustration />} />
+              <BookingWidgetSummary image="/assets/icons/payments/5.png" title="Awaiting Disbursement" total={loanstat?.awaitingDisbursement ? loanstat.awaitingDisbursement : '0'} icon={<BookingIllustration />} />
             </Grid>
 
             <Grid item xs={12} md={4}>
-              <BookingWidgetSummary image="/assets/icons/payments/loanicon.webp" title="Pending Approval" total={loanstat?.pendingApproval ? loanstat.pendingApproval : '0'} icon={<BookingIllustration />} />
+              <BookingWidgetSummary image="/assets/icons/payments/4.png" title="Pending Approval" total={loanstat?.pendingApproval ? loanstat.pendingApproval : '0'} icon={<BookingIllustration />} />
             </Grid>
 
             <Grid item xs={12} md={4}>
-              <BookingWidgetSummary image="/assets/icons/payments/loanicon.webp" title="Rejected" total={loanstat?.rejected ? loanstat.rejected : '0'} icon={<BookingIllustration />} />
+              <BookingWidgetSummary image="/assets/icons/payments/7.png" title="Rejected" total={loanstat?.rejected ? loanstat.rejected : '0'} icon={<BookingIllustration />} />
             </Grid>
 
             <Grid item xs={12} md={4}>
-              <BookingWidgetSummary image="/assets/icons/payments/loanicon.webp" title="Closed" total={loanstat?.closed ? loanstat.closed : '0'} icon={<BookingIllustration />} />
+              <BookingWidgetSummary image="/assets/icons/payments/1.png" title="Closed" total={loanstat?.closed ? loanstat.closed : '0'} icon={<BookingIllustration />} />
             </Grid>
 
             <Grid item xs={12} md={4}>
-              <BookingWidgetSummary image="/assets/icons/payments/loanicon.webp" title="Active" total={loanstat?.active ? loanstat.active : '0'} icon={<BookingIllustration />} />
+              <BookingWidgetSummary image="/assets/icons/payments/6.png" title="Active" total={loanstat?.active ? loanstat.active : '0'} icon={<BookingIllustration />} />
             </Grid>
 
             <Grid item xs={12} md={4}>
-              <BookingWidgetSummary image="/assets/icons/payments/loanicon.webp" title="Check Out" total={loanstat?.defaulted ? loanstat.defaulted : '0'} icon={<BookingIllustration />} />
+              <BookingWidgetSummary image="/assets/icons/payments/1.png" title="Defaulted" total={loanstat?.defaulted ? loanstat.defaulted : '0'} icon={<BookingIllustration />} />
             </Grid>
         </Grid>
           <br/>

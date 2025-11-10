@@ -8,10 +8,13 @@ import { useSettingsContext } from '../../components/settings';
 import {
   AppWelcome,
   AppLoanLog,
-  AppWidgetSummary,
   AppCurrentDownload,
 } from '../../sections/@dashboard/general/dashboard';
-import { SeoIllustration } from '../../assets/illustrations';
+import { SeoIllustration,BookingIllustration } from '../../assets/illustrations';
+ 
+import { 
+  BookingWidgetSummary, 
+} from '../../sections/@dashboard/loans/stat';
 
 GeneralAppPage.getLayout = (page: React.ReactElement) => <DashboardLayout>{page}</DashboardLayout>;
 
@@ -68,35 +71,25 @@ export default function GeneralAppPage() {
               }
             />
           </Grid>
-
+          
           <Grid item xs={12} md={3}>
-            <AppWidgetSummary
-              title="Loan Disbursed"
-              total={dashstat?.loanDisbursed || 0} 
-            />
-          </Grid>
+              <BookingWidgetSummary image="/assets/icons/payments/5.png" title="Loan Disbursed" total={dashstat?.loanDisbursed || 0} icon={<BookingIllustration />} />
+            </Grid>
 
-          <Grid item xs={12} md={3}>
-            <AppWidgetSummary
-              title="Total Repayment"
-              total={dashstat?.totalRepayment || 0} 
-            />
-          </Grid>
+            <Grid item xs={12} md={3}>
+              <BookingWidgetSummary image="/assets/icons/payments/4.png" title="Total Repayment" total={dashstat?.totalRepayment || 0}  icon={<BookingIllustration />} />
+            </Grid>
 
-          <Grid item xs={12} md={3}>
-            <AppWidgetSummary
-              title="Total Outstanding"
-              total={dashstat?.totalOutstanding || 0} 
-            />
-          </Grid>
+            <Grid item xs={12} md={3}>
+              <BookingWidgetSummary image="/assets/icons/payments/7.png" title="Total Outstanding" total={dashstat?.totalOutstanding || 0} icon={<BookingIllustration />} />
+            </Grid>
 
-          <Grid item xs={12} md={3}>
-            <AppWidgetSummary
-              title="Total Arears"
-              total={dashstat?.totalArrears || 0} 
-            />
-          </Grid>
+            <Grid item xs={12} md={3}>
+              <BookingWidgetSummary image="/assets/icons/payments/1.png" title="Total Arrears" total={dashstat?.totalArrears || 0}  icon={<BookingIllustration />} />
+            </Grid>
 
+           
+          
           <Grid item xs={12} md={6} lg={4}>
             <AppCurrentDownload
               title="Loan Disbursement Statistics"

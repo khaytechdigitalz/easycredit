@@ -78,8 +78,8 @@ export default function AccountBillingPaymentMethod({ cards }: Props) {
                 alt="icon"
                 src={
                   wallet.type === 'loan'
-                    ? '/assets/icons/payments/loanicon.webp'
-                    : '/assets/icons/payments/3928181.webp'
+                    ? '/assets/icons/payments/8.png'
+                    : '/assets/icons/payments/9.png'
                 }
                 sx={{ mb: 1, maxWidth: 36 }}
               />

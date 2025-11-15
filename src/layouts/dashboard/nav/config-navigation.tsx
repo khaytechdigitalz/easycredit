@@ -110,12 +110,13 @@ const navConfig = [
       
        // Complaint
       {
-        title: 'Compliant Category',
+        title: 'Manage Complaint',
         path: PATH_DASHBOARD.complaint.root,
         icon: ICONS.label,
         children: [ 
-          { title: 'list', path: PATH_DASHBOARD.complaint.list },
-          { title: 'create', path: PATH_DASHBOARD.complaint.create },
+          { title: 'All Complaints', path: PATH_DASHBOARD.complaint.manage },
+          { title: 'Complaint Category', path: PATH_DASHBOARD.complaint.category },
+          { title: 'Create Category', path: PATH_DASHBOARD.complaint.categorycreate },
         ],
       },
 
@@ -123,11 +124,22 @@ const navConfig = [
       {
         title: 'FAQ',
         path: PATH_DASHBOARD.faq.root,
-        icon: ICONS.label,
+        icon: ICONS.menuItem,
         children: [ 
           { title: 'list', path: PATH_DASHBOARD.faq.list },
           { title: 'create', path: PATH_DASHBOARD.faq.create },
         ],
+      },
+
+     {
+        title: 'Contact Us',
+        path: PATH_DASHBOARD.contact.index,
+        icon: ICONS.mail,
+      },
+     {
+        title: 'Account Tier Setup',
+        path: PATH_DASHBOARD.tier.index,
+        icon: ICONS.blog,
       },
 
       // INVOICE

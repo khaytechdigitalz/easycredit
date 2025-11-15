@@ -20,6 +20,7 @@ export type IProduct = {
   title: string;
   images: string[];
   name: string;
+  value: string;
   price: number;
   amount: number;
   userId: string;

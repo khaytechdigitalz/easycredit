@@ -67,7 +67,7 @@ export default function ComplaintNewForm({ isEdit = false, currentUser }: Props)
       enqueueSnackbar(response.data.message || 'Operation successful!');
       
       reset(); 
-      push(PATH_DASHBOARD.complaint.list);
+      push(PATH_DASHBOARD.faq.list);
 
     } catch (error) {
       console.error(error);

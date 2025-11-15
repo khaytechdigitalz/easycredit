@@ -62,6 +62,17 @@ export const PATH_DASHBOARD = {
     root: path(ROOTS_DASHBOARD, '/bills'),
     history: path(ROOTS_ADMIN, '/bills/history'),
   },
+
+  contact: {
+    root: path(ROOTS_DASHBOARD, '/contact'),
+    index: path(ROOTS_ADMIN, '/contact/manage'),
+  },
+
+  tier: {
+    root: path(ROOTS_DASHBOARD, '/tier'),
+    index: path(ROOTS_ADMIN, '/tier/manage'),
+  },
+
   transfer: {
     root: path(ROOTS_DASHBOARD, '/transfer'),
     bank: path(ROOTS_ADMIN, '/transfer/bank'),
@@ -100,8 +111,9 @@ export const PATH_DASHBOARD = {
 
   complaint: {
     root: path(ROOTS_DASHBOARD, '/complaint'),
-    list: path(ROOTS_ADMIN, '/complaint/list'),
-    create: path(ROOTS_ADMIN, '/complaint/create'),
+    manage: path(ROOTS_ADMIN, '/complaint/complaints'),
+    category: path(ROOTS_ADMIN, '/complaint/category'),
+    categorycreate: path(ROOTS_ADMIN, '/complaint/categorycreate'),
   },
 
   faq: {

@@ -1,4 +1,5 @@
-import { useState, useEffect, useMemo } from 'react'; // Added useMemo
+/* eslint-disable @typescript-eslint/no-shadow */
+import { useState, useEffect, useMemo } from 'react';
 // next
 import Head from 'next/head';
 
@@ -10,14 +11,25 @@ import {
   Container,
   Grid,
   TableContainer,
-  Button, // Added Button
-  Stack, // Added Stack
+  Button,
+  Stack,
+  // 💡 NEW IMPORTS FOR MODAL
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  // NEW IMPORTS FOR LOCAL ROW COMPONENT
+  TableRow,
+  TableCell,
+  IconButton,
+  Tooltip,
 } from '@mui/material';
 import { SelectChangeEvent } from '@mui/material/Select';
 // redux
 import axios from '../../../utils/axios';
 import { useSelector } from '../../../redux/store';
- // routes
+// routes
 import { PATH_DASHBOARD } from '../../../routes/paths';
 // layouts
 import DashboardLayout from '../../../layouts/dashboard';
@@ -36,11 +48,15 @@ import {
 } from '../../../components/table';
 import Scrollbar from '../../../components/scrollbar';
 import CustomBreadcrumbs from '../../../components/custom-breadcrumbs';
-import Iconify from '../../../components/iconify'; // Assuming Iconify is available
-import { useSnackbar } from '../../../components/snackbar'; // Added Snackbar
-// sections
-import { ProductTableRow, ProductTableToolbar } from '../../../sections/@dashboard/transfer/list';
-
+import Iconify from '../../../components/iconify';
+import { useSnackbar } from '../../../components/snackbar';
+// sections (REMOVED ProductTableRow, kept ProductTableToolbar)
+import { ProductTableToolbar } from '../../../sections/@dashboard/transfer/list'; 
+// utilities
+import { fDateTime } from '../../../utils/formatTime';
+import { fCurrency } from '../../../utils/formatNumber';
+import Label from '../../../components/label';
+// NOTE: CustomPopover and usePopover import HAS BEEN REMOVED
 
 import { 
   BookingWidgetSummary, 
@@ -49,21 +65,23 @@ import {
 import {
   BookingIllustration, 
 } from '../../../assets/illustrations';
+
 // ----------------------------------------------------------------------
+
 // Define the specific structure of the data row based on your table
 export interface ITransferItem {
   _id: string; // Key for iteration/selection
-  date: string; 
-  userId: string;
+  date: string; // Mapped from 'paidAt' or 'createdAt'
+  userId: string; 
   reference: string;
-  bankName: string;
-  accountNumber: string | number; 
-  accountName: string; 
+  bankName: string; // Mapped from providerResponse.transfer.metadata.bankName
+  accountNumber: string | number; // Mapped from providerResponse.transfer.metadata.accountNumber
+  accountName: string; // Mapped from providerResponse.transfer.metadata.accountName
   amount: number;
   status: string;
 }
 
-// Corrected TABLE_HEAD with distinct IDs for proper sorting/export mapping
+// Corrected TABLE_HEAD with Action column added
 const TABLE_HEAD = [
   { id: 'date', label: 'Date', align: 'left' }, 
   { id: 'userId', label: 'User ID', align: 'left' },
@@ -73,12 +91,116 @@ const TABLE_HEAD = [
   { id: 'accountName', label: 'Account Name', align: 'left' }, 
   { id: 'amount', label: 'Amount', align: 'left' },
   { id: 'status', label: 'Status', align: 'left' },
+  // 💡 NEW COLUMN
+  { id: 'action', label: 'Action', align: 'center', minWidth: 120 }, 
 ];
 
 const STATUS_OPTIONS = [
   { value: 'success', label: 'Successful' },
   { value: 'failed', label: 'Failed' },
+  { value: 'pending', label: 'Pending' }, 
+  { value: 'reversed', label: 'Reversed' }, 
 ];
+
+// ----------------------------------------------------------------------
+// 🌟 NEW LOCAL ROW COMPONENT (Replaces ProductTableRow and removes popover)
+// ----------------------------------------------------------------------
+
+interface TransferTableRowProps {
+  row: ITransferItem;
+  selected: boolean;
+  onSelectRow: () => void;
+  onFailReverseClick: (row: ITransferItem) => void;
+}
+
+function TransferTableRow({
+  row,
+  selected,
+  onSelectRow,
+  onFailReverseClick,
+}: TransferTableRowProps) {
+  const { 
+    date, 
+    userId, 
+    reference, 
+    bankName, 
+    accountNumber, 
+    accountName, 
+    amount, 
+    status,
+  } = row;
+
+
+  // Helper function to determine the color of the status label
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'success':
+      case 'successful':
+        return 'success';
+      case 'failed':
+        return 'error';
+      case 'reversed':
+        return 'warning';
+      default:
+        return 'info';
+    }
+  };
+
+  // Logic to show the Fail Reverse button: show only for 'failed' status
+  const showFailReverse = status.toLowerCase() === 'failed';
+
+  return (
+    <TableRow hover selected={selected}>
+      {/* Checkbox column removed for brevity, assuming standard implementation */}
+
+      <TableCell>{fDateTime(date)}</TableCell>
+      <TableCell>{userId}</TableCell>
+      <TableCell>{reference}</TableCell>
+      <TableCell>{bankName}</TableCell>
+      <TableCell>{accountNumber}</TableCell>
+      <TableCell>{accountName}</TableCell>
+      <TableCell>{fCurrency(amount)}</TableCell>
+
+      <TableCell>
+        <Label variant="soft" color={getStatusColor(status)}>
+          {status}
+        </Label>
+      </TableCell>
+
+      {/* 💡 ACTION BUTTON CELL */}
+      <TableCell align="center">
+        <Stack direction="row" spacing={1} justifyContent="center">
+          
+          {/* Fail Reverse Button */}
+          {showFailReverse && (
+            <Tooltip title="Fail Reverse: Click to initiate reversal." arrow>
+              <IconButton 
+                color="error"
+                // 🔑 Critical: Call the handler passed from the parent with the current row data
+                onClick={() => onFailReverseClick(row)}
+              >
+                <Iconify icon="eva:flash-fill" /> 
+              </IconButton>
+            </Tooltip>
+          )}
+
+          {/* If the status is NOT failed, show a disabled button/icon */}
+          {!showFailReverse && (
+             <Tooltip title="Action not available for this status" arrow>
+                <IconButton 
+                  color="default"
+                  disabled
+                >
+                  <Iconify icon="eva:slash-fill" /> 
+                </IconButton>
+             </Tooltip>
+          )}
+
+        </Stack>
+      </TableCell>
+    </TableRow>
+  );
+}
 
 // ----------------------------------------------------------------------
 
@@ -124,6 +246,11 @@ export default function TransferPage() {
 
   const [responselog, setDashlog] = useState<any>(null);
 
+  // 💡 NEW STATE FOR MODAL AND ROW DATA
+  const [openFailReverseModal, setOpenFailReverseModal] = useState(false);
+  const [selectedRowToReverse, setSelectedRowToReverse] = useState<ITransferItem | null>(null);
+
+
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
@@ -147,32 +274,46 @@ export default function TransferPage() {
  
   
   useEffect(() => {
-  const dataFromApi = responselog?.data?.data;
+    const dataFromApi = responselog?.data?.data;
 
-  const processData = (data: any[] | Record<string, any>) => {
-    const finalArray: any[] = Array.isArray(data) ? data : Object.values(data || {});
+    const processData = (data: any[] | Record<string, any>) => {
+      const finalArray: any[] = Array.isArray(data) ? data : Object.values(data || {});
 
-    // Basic validation and type-assertion
-    const isValidTransferArray = finalArray.every(item => 
-      item && 
-      typeof item === 'object' && 
-      '_id' in item // Ensure primary key exists
-    );
-      
-    if (isValidTransferArray) {
-        setTableData(finalArray as ITransferItem[]);
-    } else {
-        console.error('Data does not match expected ITransferItem structure.', finalArray);
-        setTableData([]);
+      // 🔑 UPDATED PROCESSING LOGIC
+      const processedData: ITransferItem[] = finalArray.map((item) => {
+        // Safely access nested metadata
+        const metadata = item.providerResponse?.transfer?.metadata || {};
+        const transferData = item.providerResponse?.transfer || {};
+
+        return {
+          _id: item._id,
+          // Use paidAt if available (more accurate completion time), otherwise createdAt
+          date: transferData.paidAt || item.createdAt, 
+          userId: item.userId,
+          reference: item.reference,
+          // Extracting nested fields:
+          bankName: metadata.bankName || item.providerType || 'N/A',
+          accountNumber: metadata.accountNumber || item.recipient || 'N/A', // Fallback to recipient
+          accountName: metadata.accountName || item.customerAccountNo || 'N/A', // Fallback to customerAccountNo
+          amount: item.amount || transferData.total || 0,
+          status: item.status,
+        } as ITransferItem;
+      });
+        
+      if (processedData.every(item => item && '_id' in item)) {
+          setTableData(processedData);
+      } else {
+          console.warn('Data structure mismatch or missing primary key.', finalArray);
+          setTableData([]);
+      }
+    };
+
+    if (dataFromApi) {
+      processData(dataFromApi);
+    } else if (Array.isArray(responselog)) {
+      processData(responselog);
     }
-  };
-
-  if (dataFromApi) {
-    processData(dataFromApi);
-  } else if (Array.isArray(responselog)) {
-    processData(responselog);
-  }
-}, [responselog]);
+  }, [responselog]);
 
 
   
@@ -208,8 +349,52 @@ export default function TransferPage() {
     setFilterStatus([]);
   };
 
+  // 💡 HANDLERS FOR ACTION BUTTON AND API CALL
+  const handleOpenFailReverseModal = (row: ITransferItem) => {
+      setSelectedRowToReverse(row);
+      setOpenFailReverseModal(true);
+  };
+
+  const handleCloseFailReverseModal = () => {
+      setOpenFailReverseModal(false);
+      setSelectedRowToReverse(null);
+  };
+
+  const handleFailReverseAction = async () => {
+      if (!selectedRowToReverse) return;
+
+      const transactionId = selectedRowToReverse._id;
+
+      handleCloseFailReverseModal(); // Close modal immediately
+
+      try {
+          const accessToken = localStorage.getItem('accessToken');
+          const config = {
+              headers: {
+                  'Authorization': `Bearer ${accessToken}`
+              }
+          };
+
+          // Call the specified endpoint /admin/bill/fail_reverse/{data._id}
+          await axios.put(`/admin/bill/fail_reverse/${transactionId}`, null, config); 
+
+          // Update the table data locally to reflect the change (optional: status update)
+          setTableData(prevData =>
+              prevData.map(item =>
+                  item._id === transactionId ? { ...item, status: 'Reversed' } : item
+              )
+          );
+          
+          enqueueSnackbar(`Fail Reverse successful for ID: ${transactionId}`, { variant: 'success' });
+      } catch (error) {
+          console.error('Fail Reverse Error:', error);
+          enqueueSnackbar('Fail Reverse action failed!', { variant: 'error' });
+      }
+  };
+
+
   // ----------------------------------------------------------------------
-  // 💾 CSV Export Function
+  // 💾 CSV Export Function (Updated to exclude 'Action')
   // ----------------------------------------------------------------------
   const exportToCsv = () => {
     if (!dataFiltered || dataFiltered.length === 0) {
@@ -217,12 +402,13 @@ export default function TransferPage() {
         return;
     }
     
-    // 1. Prepare Headers (use labels from TABLE_HEAD)
+    // 1. Prepare Headers (use labels from TABLE_HEAD, exclude 'Action')
     const headers = TABLE_HEAD
+        .filter(head => head.id !== 'action') 
         .map(head => head.label)
         .join(',');
 
-    // 2. Prepare Data Rows (Ensure property names match ITransferItem)
+    // 2. Prepare Data Rows 
     const csvRows = dataFiltered.map((row) => {
         const rowData = row as ITransferItem;
         const values = [
@@ -261,7 +447,7 @@ export default function TransferPage() {
 
 
   // ----------------------------------------------------------------------
-  // 📊 Excel Export Function
+  // 📊 Excel Export Function (Updated to exclude 'Action')
   // ----------------------------------------------------------------------
   const exportToExcel = () => {
     if (!dataFiltered || dataFiltered.length === 0) {
@@ -269,7 +455,11 @@ export default function TransferPage() {
         return;
     }
 
-    const headers = TABLE_HEAD.map(head => `<th>${head.label}</th>`).join('');
+    // 1. Prepare Headers (use labels from TABLE_HEAD, exclude 'Action')
+    const headers = TABLE_HEAD
+        .filter(head => head.id !== 'action')
+        .map(head => `<th>${head.label}</th>`)
+        .join('');
     
     const tableRows = dataFiltered.map((row) => {
       const rowData = row as ITransferItem;
@@ -358,7 +548,7 @@ export default function TransferPage() {
             onResetFilter={handleResetFilter}
           />
 
-          {/* 2. 💡 Export Buttons placed right after the toolbar */}
+          {/* 2. Export Buttons placed right after the toolbar */}
           <Stack 
               direction="row" 
               spacing={1} 
@@ -413,11 +603,12 @@ export default function TransferPage() {
                     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                     .map((row, index) =>
                       row ? (
-                        <ProductTableRow
+                        <TransferTableRow // 🌟 USING THE LOCAL COMPONENT
                           key={row?._id}
-                          row={row} // Pass the entire row object
+                          row={row} 
                           selected={selected.includes(row?._id)}
                           onSelectRow={() => onSelectRow(row?._id)}
+                          onFailReverseClick={handleOpenFailReverseModal} 
                          />
                       ) : (
                         !isNotFound && <TableSkeleton key={index} sx={{ height: denseHeight }} />
@@ -448,6 +639,40 @@ export default function TransferPage() {
         </Card>
       </Container>
  
+      {/* 💡 CONFIRMATION MODAL FOR FAIL REVERSE ACTION */}
+      <Dialog
+          open={openFailReverseModal}
+          onClose={handleCloseFailReverseModal}
+          aria-labelledby="alert-dialog-title"
+          aria-describedby="alert-dialog-description"
+      >
+          <DialogTitle id="alert-dialog-title">
+              Confirm Fail Reverse Action
+          </DialogTitle>
+          <DialogContent>
+              <DialogContentText id="alert-dialog-description">
+                  Are you sure you want to trigger the **Fail Reverse** action for this transaction?
+                  <br />
+                  **Transaction ID:** {selectedRowToReverse?._id}
+                  <br />
+                  **Reference:** {selectedRowToReverse?.reference}
+              </DialogContentText>
+          </DialogContent>
+          <DialogActions>
+              <Button onClick={handleCloseFailReverseModal} color="inherit">
+                  Cancel
+              </Button>
+              <Button 
+                  onClick={handleFailReverseAction} 
+                  color="error" 
+                  variant="contained" 
+                  autoFocus
+              >
+                  Okay
+              </Button>
+          </DialogActions>
+      </Dialog>
+      {/* END OF MODAL */}
     </>
   );
 }

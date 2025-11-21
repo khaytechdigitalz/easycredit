@@ -68,10 +68,21 @@ export const PATH_DASHBOARD = {
     index: path(ROOTS_ADMIN, '/contact/manage'),
   },
 
+  livechat: {
+    root: path(ROOTS_DASHBOARD, '/livechat'),
+    index: path(ROOTS_ADMIN, '/livechat/manage'),
+  },
+
   tier: {
     root: path(ROOTS_DASHBOARD, '/tier'),
     index: path(ROOTS_ADMIN, '/tier/manage'),
   },
+
+  kyc: {
+    root: path(ROOTS_DASHBOARD, '/kyc'),
+    index: path(ROOTS_ADMIN, '/kyc/manage'),
+  },
+
 
   transfer: {
     root: path(ROOTS_DASHBOARD, '/transfer'),

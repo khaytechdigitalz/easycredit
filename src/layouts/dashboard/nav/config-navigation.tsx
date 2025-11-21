@@ -53,15 +53,12 @@ const navConfig = [
 
 
       // USER
-      {
+
+     {
         title: 'Customers',
         path: PATH_DASHBOARD.client.list,
         icon: ICONS.user,
-        children: [ 
-          { title: 'list', path: PATH_DASHBOARD.client.list },
-          { title: 'create', path: PATH_DASHBOARD.client.create },
-        ],
-      },
+      }, 
 
       // LOAN
       {
@@ -120,7 +117,32 @@ const navConfig = [
         ],
       },
 
-       // Complaint
+      // Live Chat
+     {
+        title: 'Contact Us',
+        path: PATH_DASHBOARD.contact.index,
+        icon: ICONS.mail,
+      },
+
+     {
+        title: 'Live Chat',
+        path: PATH_DASHBOARD.livechat.index,
+        icon: ICONS.chat,
+      },
+     {
+        title: 'Account Tier Setup',
+        path: PATH_DASHBOARD.tier.index,
+        icon: ICONS.blog,
+      },
+
+       // KYC
+     {
+        title: 'KYC',
+        path: PATH_DASHBOARD.kyc.index,
+        icon: ICONS.folder,
+      },
+
+       // FAQ
       {
         title: 'FAQ',
         path: PATH_DASHBOARD.faq.root,
@@ -129,17 +151,6 @@ const navConfig = [
           { title: 'list', path: PATH_DASHBOARD.faq.list },
           { title: 'create', path: PATH_DASHBOARD.faq.create },
         ],
-      },
-
-     {
-        title: 'Contact Us',
-        path: PATH_DASHBOARD.contact.index,
-        icon: ICONS.mail,
-      },
-     {
-        title: 'Account Tier Setup',
-        path: PATH_DASHBOARD.tier.index,
-        icon: ICONS.blog,
       },
 
       // INVOICE

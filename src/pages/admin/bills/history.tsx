@@ -1,6 +1,9 @@
-import { useState, useEffect, useMemo } from 'react';
+/* eslint-disable arrow-body-style */
+/* eslint-disable @typescript-eslint/no-shadow */
+import { useState, useEffect, useMemo, useCallback } from 'react';
 // next
 import Head from 'next/head';
+// next/router is not used, so the import is unnecessary. Keeping it if it's used elsewhere in the original project structure.
 
 // @mui
 import {
@@ -12,12 +15,26 @@ import {
   TableContainer,
   Button,
   Stack,
+  // 💡 NEW IMPORTS FOR MODAL
+  Modal,
+  Box,
+  Typography,
+  Select,
+  MenuItem,
+  TextField,
+  FormControl,
+  InputLabel,
+  // 💡 NEW IMPORTS FOR LOCAL ROW COMPONENT
+  TableRow,
+  TableCell,
 } from '@mui/material';
 import { SelectChangeEvent } from '@mui/material/Select';
+// date-fns
+import { format } from 'date-fns'; 
 // redux
 import axios from '../../../utils/axios';
-import { useSelector } from '../../../redux/store';
- // routes
+// Removed: import { useSelector } from '../../../redux/store'; // ❌ REMOVED: Redux useSelector is not being used
+// routes
 import { PATH_DASHBOARD } from '../../../routes/paths';
 // layouts
 import DashboardLayout from '../../../layouts/dashboard';
@@ -37,35 +54,42 @@ import {
 import Scrollbar from '../../../components/scrollbar';
 import CustomBreadcrumbs from '../../../components/custom-breadcrumbs';
 import Iconify from '../../../components/iconify';
-import { useSnackbar } from '../../../components/snackbar'; 
+import { useSnackbar } from '../../../components/snackbar';
 // sections
-import { ProductTableRow, ProductTableToolbar } from '../../../sections/@dashboard/bills/list';
+import { ProductTableToolbar } from '../../../sections/@dashboard/bills/list';
+// utilities
+import { fDateTime } from '../../../utils/formatTime';
+import { fCurrency } from '../../../utils/formatNumber';
+import Label from '../../../components/label';
 
-
-import { 
-  BookingWidgetSummary, 
+import {
+  BookingWidgetSummary,
 } from '../../../sections/@dashboard/bills/stat';
 // assets
 import {
-  BookingIllustration, 
+  BookingIllustration,
 } from '../../../assets/illustrations';
+
 // ----------------------------------------------------------------------
+
 // Define the specific structure of the data row based on your table
 export interface IBillItem {
-  _id: string; 
-  date: string; 
+  _id: string;
+  date: string; // Mapped from createdAt
   userId: string;
+  reference: string;
   billId: string;
   serviceType: string;
-  recipient: string | number; 
-  provider: string;
+  recipient: string | number;
+  provider: string; // Mapped from providerType
   amount: number;
   status: string;
 }
 
 // Corrected TABLE_HEAD with distinct IDs for proper sorting/export mapping
 const TABLE_HEAD = [
-  { id: 'date', label: 'Date', align: 'left' }, 
+  { id: 'date', label: 'Date', align: 'left' },
+  { id: 'reference', label: 'Reference', align: 'left' },
   { id: 'userId', label: 'User ID', align: 'left' },
   { id: 'billId', label: 'Bill ID', align: 'left' },
   { id: 'serviceType', label: 'Service Type', align: 'left' },
@@ -75,14 +99,208 @@ const TABLE_HEAD = [
   { id: 'status', label: 'Status', align: 'left' },
 ];
 
-const STATUS_OPTIONS = [
+const STATUS_OPTIONS_FOR_TOOLBAR = [
   { value: 'airtime', label: 'Airtime' },
   { value: 'data', label: 'Internet' },
   { value: 'tv', label: 'Cable TV' },
   { value: 'electricity', label: 'Electricity' },
   { value: 'transfer', label: 'Bank Transfer' },
 ];
+
+// 💡 NEW OPTIONS FOR FILTER MODAL STATUS
+const STATUS_OPTIONS_FOR_MODAL = [
+  { value: '', label: 'All Statuses' },
+  { value: 'success', label: 'Successful' },
+  { value: 'pending', label: 'Pending' },
+  { value: 'failed', label: 'Failed' },
+];
+
 // ----------------------------------------------------------------------
+// 🌟 LOCAL ROW COMPONENT
+// ----------------------------------------------------------------------
+
+interface BillTableRowProps {
+  row: IBillItem;
+  selected: boolean;
+  onSelectRow: () => void;
+}
+
+function BillTableRow({
+  row,
+  selected,
+  onSelectRow,
+}: BillTableRowProps) {
+  const {
+    date,
+    reference,
+    userId,
+    billId,
+    serviceType,
+    recipient,
+    provider,
+    amount,
+    status,
+  } = row;
+
+  // Helper function to determine the color of the status label
+  const getStatusColor = (status: string) => {
+    switch (status.toLowerCase()) {
+      case 'success':
+      case 'successful':
+        return 'success';
+      case 'failed':
+        return 'error';
+      case 'pending':
+        return 'warning';
+      default:
+        return 'info';
+    }
+  };
+
+  return (
+    <TableRow hover selected={selected} onClick={onSelectRow}>
+      {/* Remove Checkbox column if not needed, assuming it's omitted based on the original component usage */}
+
+      <TableCell>{fDateTime(date)}</TableCell>
+      <TableCell>{reference}</TableCell>
+      <TableCell>{userId}</TableCell>
+      <TableCell>{billId}</TableCell>
+      <TableCell>{serviceType}</TableCell>
+      <TableCell>{recipient}</TableCell>
+      <TableCell>{provider}</TableCell>
+      <TableCell>{fCurrency(amount)}</TableCell>
+
+      <TableCell>
+        <Label variant="soft" color={getStatusColor(status)}>
+          {status}
+        </Label>
+      </TableCell>
+    </TableRow>
+  );
+}
+
+// ----------------------------------------------------------------------
+// 💡 NEW: FILTER MODAL COMPONENT
+// ----------------------------------------------------------------------
+
+interface FilterState {
+  status: string;
+  search: string;
+  from: string;
+  to: string;
+}
+
+interface TransactionFilterModalProps {
+  open: boolean;
+  onClose: () => void;
+  onSubmit: (filters: FilterState) => void;
+  initialFilters: FilterState; // To pre-fill the form
+}
+
+function TransactionFilterModal({ open, onClose, onSubmit, initialFilters }: TransactionFilterModalProps) {
+  const [status, setStatus] = useState(initialFilters.status);
+  const [search, setSearch] = useState(initialFilters.search);
+  const [dateFrom, setDateFrom] = useState(initialFilters.from);
+  const [dateTo, setDateTo] = useState(initialFilters.to);
+  
+  // Update local state when initialFilters changes (e.g., when the modal opens)
+  useEffect(() => {
+    setStatus(initialFilters.status);
+    setSearch(initialFilters.search);
+    setDateFrom(initialFilters.from);
+    setDateTo(initialFilters.to);
+  }, [initialFilters, open]);
+
+
+  const handleSubmit = (event: React.FormEvent) => {
+    event.preventDefault();
+    onSubmit({
+      status,
+      search,
+      from: dateFrom,
+      to: dateTo,
+    });
+    // onClose(); // Let parent handle closing, or close here if desired
+  };
+
+  const style = {
+    position: 'absolute' as const,
+    top: '50%',
+    left: '50%',
+    transform: 'translate(-50%, -50%)',
+    width: 400,
+    bgcolor: 'background.paper',
+    boxShadow: 24,
+    p: 4,
+    borderRadius: 1,
+  };
+
+  return (
+    <Modal open={open} onClose={onClose}>
+      <Box sx={style}>
+        <Typography variant="h6" component="h2" gutterBottom>
+          Filter Transactions
+        </Typography>
+        <Box component="form" onSubmit={handleSubmit} sx={{ mt: 2 }}>
+          {/* Status Select */}
+          <FormControl fullWidth sx={{ mb: 2 }}>
+            <InputLabel id="status-select-label">Status</InputLabel>
+            <Select
+              labelId="status-select-label"
+              value={status}
+              label="Status"
+              onChange={(e) => setStatus(e.target.value)}
+            >
+              {STATUS_OPTIONS_FOR_MODAL.map((option) => (
+                <MenuItem key={option.value} value={option.value}>
+                  {option.label}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          {/* Search Input */}
+          <TextField
+            fullWidth
+            label="Search (User ID/Bill ID)"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            sx={{ mb: 2 }}
+          />
+
+          {/* Date Range - From */}
+          <TextField
+            fullWidth
+            label="Date From"
+            type="date"
+            value={dateFrom}
+            onChange={(e) => setDateFrom(e.target.value)}
+            InputLabelProps={{ shrink: true }}
+            sx={{ mb: 2 }}
+          />
+
+          {/* Date Range - To */}
+          <TextField
+            fullWidth
+            label="Date To"
+            type="date"
+            value={dateTo}
+            onChange={(e) => setDateTo(e.target.value)}
+            InputLabelProps={{ shrink: true }}
+            sx={{ mb: 2 }}
+          />
+
+          <Button type="submit" variant="contained" fullWidth>
+            Apply Filter
+          </Button>
+        </Box>
+      </Box>
+    </Modal>
+  );
+}
+
+// ----------------------------------------------------------------------
+
 
 BillsPage.getLayout = (page: React.ReactElement) => (
   <DashboardLayout>{page}</DashboardLayout>
@@ -116,73 +334,147 @@ export default function BillsPage() {
   const { themeStretch } = useSettingsContext();
 
 
-  const { isLoading } = useSelector((state) => state.product);
-
   const [tableData, setTableData] = useState<IBillItem[]>([]);
-
-  const [filterName, setFilterName] = useState('');
-
-  const [filterStatus, setFilterStatus] = useState<string[]>([]);
+  const [isModalOpen, setIsModalOpen] = useState(false); 
+  const [filterName, setFilterName] = useState(''); 
+  const [filterStatus, setFilterStatus] = useState<string[]>([]); 
   
+  // 💡 NEW STATE: Loading state for the table data fetch
+  const [tableLoading, setTableLoading] = useState(false); 
+
+
+  // 💡 API Filter State (Must match FilterState interface)
+  const [apiFilters, setApiFilters] = useState<FilterState>({
+    status: '',
+    search: '',
+    from: '',
+    to: '',
+  });
+
+
   // 💡 FIX 1: Access window safely
   const queryString = typeof window !== 'undefined' ? window.location.search : '';
   const params = new URLSearchParams(queryString);
-  const typeValue = params.get('type'); 
+  const typeValue = params.get('type');
   
   const [responselog, setDashlog] = useState<any>(null);
+  
+  // Helper to check if API filters are active
+  const isApiFilterActive = useMemo(() => {
+    return !!(apiFilters.status || apiFilters.search || apiFilters.from || apiFilters.to);
+  }, [apiFilters]);
+
+
+  // 💡 UPDATED: Fetching data logic (Handles both initial load and search)
+  const fetchDashboardData = useCallback(async () => {
+    setTableLoading(true); // Start loading
+    try {
+      const accessToken = localStorage.getItem('accessToken');
+      const config = {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`
+        }
+      };
+      
+      let url: string;
+      
+      if (isApiFilterActive) {
+        // SCENARIO 1: Use the dedicated search endpoint with parameters
+        const { status, search, from, to } = apiFilters;
+        const formattedFrom = from ? format(new Date(from), 'yyyy-MM-dd') : '';
+        const formattedTo = to ? format(new Date(to), 'yyyy-MM-dd') : '';
+        
+        const queryParams = new URLSearchParams({
+          search,
+          status,
+          from: formattedFrom,
+          to: formattedTo,
+        }).toString();
+
+        url = `/admin/bill/search?${queryParams}`;
+        enqueueSnackbar('Applying filter...', { variant: 'info' });
+
+      } else {
+        // SCENARIO 2: Use the original endpoint for all bills/default load
+        url = `/admin/bill/history/${typeValue || ''}`; 
+      }
+
+      const apiResponse = await axios.get(url, config);
+      setDashlog(apiResponse.data);
+      enqueueSnackbar('Transactions fetched successfully!', { variant: 'success' });
+      setTableLoading(false); // End loading on success
+
+    } catch (error) {
+      console.error("API Call Error:", error);
+      enqueueSnackbar('Failed to fetch transactions.', { variant: 'error' });
+      setDashlog(null);
+      setTableData([]);
+      setTableLoading(false); // End loading on failure
+    }
+  }, [apiFilters, isApiFilterActive, typeValue, enqueueSnackbar]); 
 
   useEffect(() => {
-    const fetchDashboardData = async () => {
-      // 💡 FIX 2: Guard clause - Only run fetch if typeValue is truthy
-      // if (!typeValue) return; 
+    fetchDashboardData();
+  }, [fetchDashboardData]); 
 
-      try {
-        const accessToken = localStorage.getItem('accessToken');
-        const config = {
-          headers: {
-            'Authorization': `Bearer ${accessToken}`
-          }
-        }; 
+  
+  // 💡 NEW: Function to handle modal submission (API Filter)
+  const handleModalSubmit = (filters: FilterState) => {
+    setApiFilters(filters);
+    setPage(0); // Reset pagination on new API filter
+    setIsModalOpen(false); // Close the modal
+  };
+  
+  // 💡 NEW: Handle clear all filters (local and API)
+  const handleClearAllFilters = () => {
+    setFilterName(''); // Clear local filter
+    setFilterStatus([]); // Clear local status filter
+    // Clear API filters, which triggers a re-fetch of the default endpoint
+    setApiFilters({ status: '', search: '', from: '', to: '' }); 
+    setPage(0);
+  };
+
+
+  useEffect(() => {
+    const dataFromApi = responselog?.data?.data;
+
+    const processData = (data: any[] | Record<string, any>) => {
+      const finalArray: any[] = Array.isArray(data) ? data : Object.values(data || {});
+
+      const processedData: IBillItem[] = finalArray.map((item) => ({
+          _id: item._id,
+          // Mapping: 'date' comes from 'createdAt'
+          date: item.createdAt,
+          reference: item.reference,
+          userId: item.userId,
+          billId: item.billId || 'N/A',
+          serviceType: item.serviceType,
+          // Mapping: 'recipient' (e.g., phone number)
+          recipient: item.recipient || item.customerAccountNo || 'N/A',
+          // Mapping: 'provider' comes from 'providerType'
+          provider: item.providerType || 'N/A',
+          amount: item.amount || 0,
+          status: item.status,
+        } as IBillItem));
         
-        const apiResponse = await axios.get(`/admin/bill/history/${typeValue}`, config);
-        setDashlog(apiResponse.data);
-      } catch (error) {
-        console.error("API Call Error:", error);
+      if (processedData.every(item => item && '_id' in item)) {
+          setTableData(processedData);
+      } else {
+          console.warn('Data structure mismatch or missing primary key.', finalArray);
+          setTableData([]);
       }
     };
 
-    fetchDashboardData();
-  }, [typeValue]); 
- 
-  
-  useEffect(() => {
-  const dataFromApi = responselog?.data?.data;
-
-  const processData = (data: any[] | Record<string, any>) => {
-    const finalArray: any[] = Array.isArray(data) ? data : Object.values(data || {});
-
-    const isValidBillArray = finalArray.every(item => 
-      item && 
-      typeof item === 'object' && 
-      '_id' in item 
-    );
-      
-    if (isValidBillArray) {
-        setTableData(finalArray as IBillItem[]);
-    } else {
-        setTableData([]);
+    if (dataFromApi) {
+      processData(dataFromApi);
+    } else if (Array.isArray(responselog)) {
+      processData(responselog);
     }
-  };
-
-  if (dataFromApi) {
-    processData(dataFromApi);
-  } else if (Array.isArray(responselog)) {
-    processData(responselog);
-  }
-}, [responselog]);
+  }, [responselog]);
 
 
   
+  // NOTE: The existing local table filter (`applyFilter`) still filters the *current* API result (`tableData`)
   const dataFiltered = useMemo(() => applyFilter({
     inputData: tableData,
     comparator: getComparator(order, orderBy),
@@ -195,7 +487,8 @@ export default function BillsPage() {
 
   const isFiltered = filterName !== '' || !!filterStatus.length;
 
-  const isNotFound = (!dataFiltered.length && !!filterName) || (!isLoading && !dataFiltered.length);
+  // 💡 UPDATED: Check for not found based on local filter and API loading state
+  const isNotFound = (!dataFiltered.length && !!filterName) || (!tableLoading && !dataFiltered.length);
  
   const handleFilterName = (event: React.ChangeEvent<HTMLInputElement>) => {
     setPage(0);
@@ -210,13 +503,8 @@ export default function BillsPage() {
     setFilterStatus(typeof value === 'string' ? value.split(',') : value);
   };
   
-  const handleResetFilter = () => {
-    setFilterName('');
-    setFilterStatus([]);
-  };
-
   // ----------------------------------------------------------------------
-  // 💾 CSV Export Function
+  // 💾 CORRECTED: CSV Export Function
   // ----------------------------------------------------------------------
   const exportToCsv = () => {
     if (!dataFiltered || dataFiltered.length === 0) {
@@ -232,6 +520,7 @@ export default function BillsPage() {
         const rowData = row as IBillItem;
         const values = [
             rowData.date, 
+            rowData.reference,
             rowData.userId, 
             rowData.billId, 
             rowData.serviceType, 
@@ -266,7 +555,7 @@ export default function BillsPage() {
 
 
   // ----------------------------------------------------------------------
-  // 📊 Excel Export Function
+  // 📊 CORRECTED: Excel Export Function
   // ----------------------------------------------------------------------
   const exportToExcel = () => {
     if (!dataFiltered || dataFiltered.length === 0) {
@@ -280,6 +569,7 @@ export default function BillsPage() {
       const rowData = row as IBillItem;
       const rowValues = [
           rowData.date, 
+          rowData.reference,
           rowData.userId, 
           rowData.billId, 
           rowData.serviceType, 
@@ -322,6 +612,7 @@ export default function BillsPage() {
     
     enqueueSnackbar('Excel exported successfully!', { variant: 'success' });
   };
+  
 
   return (
     <>
@@ -360,18 +651,49 @@ export default function BillsPage() {
             filterStatus={filterStatus}
             onFilterName={handleFilterName}
             onFilterStatus={handleFilterStatus}
-            statusOptions={STATUS_OPTIONS}
+            statusOptions={STATUS_OPTIONS_FOR_TOOLBAR}
             isFiltered={isFiltered}
-            onResetFilter={handleResetFilter}
+            onResetFilter={() => { setFilterName(''); setFilterStatus([]); }} // Local reset
           />
-
-          {/* 2. 💡 Export Buttons placed right after the toolbar */}
+          
           <Stack 
               direction="row" 
               spacing={1} 
-              justifyContent="flex-end"
+              justifyContent="space-between" 
               sx={{ p: 1.5, pr: 3, pt: 0 }} 
           >
+            {/* 💡 NEW: Filter Transaction Button */}
+            <Button
+              variant="contained"
+              onClick={() => setIsModalOpen(true)}
+              startIcon={<Iconify icon="ic:round-filter-list" />}
+            >
+              Filter Transaction
+            </Button>
+            
+            {/* Display Active API Filters and Clear Button */}
+            <Stack direction="row" spacing={1} alignItems="center">
+                {isApiFilterActive && (
+                  <Label variant="filled" color="primary">
+                      API Filter Active
+                  </Label>
+                )}
+                
+                {isApiFilterActive && (
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    onClick={handleClearAllFilters}
+                    startIcon={<Iconify icon="eva:trash-2-outline" />}
+                  >
+                    Clear Filter
+                  </Button>
+                )}
+            </Stack>
+
+
+            {/* 2. Export Buttons placed on the right */}
+            <Stack direction="row" spacing={1}>
               <Button
                   variant="outlined"
                   onClick={exportToCsv}
@@ -388,8 +710,10 @@ export default function BillsPage() {
               >
                   Export XLS
               </Button>
+            </Stack>
           </Stack>
-          {/* END OF EXPORT BUTTONS */}
+          {/* END OF NEW BUTTONS / EXPORT BUTTONS */}
+
 
           <TableContainer sx={{ position: 'relative', overflow: 'unset' }}>
             <TableSelectedAction
@@ -416,17 +740,18 @@ export default function BillsPage() {
                 />
 
                 <TableBody>
-                  {(isLoading ? [...Array(rowsPerPage)] : dataFiltered)
+                  {(tableLoading ? [...Array(rowsPerPage)] : dataFiltered) // 💡 USE tableLoading HERE
                     .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                     .map((row, index) =>
                       row ? (
-                        <ProductTableRow
+                        <BillTableRow 
                           key={row?._id}
                           row={row} 
                           selected={selected.includes(row?._id)}
                           onSelectRow={() => onSelectRow(row?._id)}
                          />
                       ) : (
+                        // 💡 Show skeleton when tableLoading is true
                         !isNotFound && <TableSkeleton key={index} sx={{ height: denseHeight }} />
                       )
                     )}
@@ -454,11 +779,21 @@ export default function BillsPage() {
           />
         </Card>
       </Container>
+      
+      {/* 💡 NEW: Transaction Filter Modal */}
+      <TransactionFilterModal
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSubmit={handleModalSubmit}
+        initialFilters={apiFilters}
+      />
  
     </>
   );
 }
 
+// ----------------------------------------------------------------------
+// Filter function (No change)
 // ----------------------------------------------------------------------
 
 function applyFilter({
@@ -485,7 +820,7 @@ function applyFilter({
   if (filterName) {
     inputData = inputData.filter(
       (product) => product.userId.toLowerCase().includes(filterName.toLowerCase()) || 
-                   product.billId.toLowerCase().includes(filterName.toLowerCase())
+                   product.billId.toString().toLowerCase().includes(filterName.toLowerCase())
     );
   }
 

@@ -144,7 +144,7 @@ const ComplaintThreadViewAndReplyModal = ({ onClose, currentData, onSubmitted }:
 
   if (!currentData) return null;
 
-  const { _id, subject, message, status, createdAt, updatedAt, categoryId, createdBy, responses } = currentData;
+  const { _id, subject,  status, createdAt, updatedAt, categoryId, createdBy, responses } = currentData;
 
   // Form methods for the reply input
   const methods = useForm<ReplyFormValuesProps>({

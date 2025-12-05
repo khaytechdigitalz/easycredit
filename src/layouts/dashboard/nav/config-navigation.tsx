@@ -52,6 +52,14 @@ const navConfig = [
 
 
 
+      // ADMIN
+
+     {
+        title: 'Staff',
+        path: PATH_DASHBOARD.staff.list,
+        icon: ICONS.lock,
+      },
+
       // USER
 
      {
@@ -114,6 +122,16 @@ const navConfig = [
           { title: 'All Complaints', path: PATH_DASHBOARD.complaint.manage },
           { title: 'Complaint Category', path: PATH_DASHBOARD.complaint.category },
           { title: 'Create Category', path: PATH_DASHBOARD.complaint.categorycreate },
+        ],
+      },
+      // ROLES AND PERMISSION
+      {
+        title: 'Roles & Permission',
+        path: PATH_DASHBOARD.roles.root,
+        icon: ICONS.menuItem,
+        children: [ 
+          { title: 'Roles', path: PATH_DASHBOARD.roles.index },
+          { title: 'Permissions', path: PATH_DASHBOARD.roles.permissions },
         ],
       },
 

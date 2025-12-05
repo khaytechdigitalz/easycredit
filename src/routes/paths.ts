@@ -73,6 +73,12 @@ export const PATH_DASHBOARD = {
     index: path(ROOTS_ADMIN, '/livechat/manage'),
   },
 
+  roles: {
+    root: path(ROOTS_DASHBOARD, '/roles'),
+    index: path(ROOTS_ADMIN, '/roles/manage'),
+    permissions: path(ROOTS_ADMIN, '/roles/permissions'),
+  },
+
   tier: {
     root: path(ROOTS_DASHBOARD, '/tier'),
     index: path(ROOTS_ADMIN, '/tier/manage'),
@@ -133,6 +139,13 @@ export const PATH_DASHBOARD = {
     create: path(ROOTS_ADMIN, '/faq/create'),
   },
 
+
+  staff: {
+    root: path(ROOTS_DASHBOARD, '/staff/'),
+    list: path(ROOTS_ADMIN, '/staff/list'),
+    view: (id: string) =>  path(ROOTS_ADMIN, `/staff/${id}`),
+    create: path(ROOTS_ADMIN, '/staff/create'),
+  },
 
   client: {
     root: path(ROOTS_DASHBOARD, '/client/'),
@@ -205,15 +218,15 @@ export const PATH_DASHBOARD = {
 };
 
 export const PATH_DOCS = {
-  root: 'https://docs.minimals.cc',
-  changelog: 'https://docs.minimals.cc/changelog',
+  root: '#',
+  changelog: '#',
 };
 
-export const PATH_ZONE_ON_STORE = 'https://mui.com/store/items/zone-landing-page/';
+export const PATH_ZONE_ON_STORE = '#';
 
-export const PATH_MINIMAL_ON_STORE = 'https://mui.com/store/items/minimal-dashboard/';
+export const PATH_MINIMAL_ON_STORE = '#';
 
-export const PATH_FREE_VERSION = 'https://mui.com/store/items/minimal-dashboard-free/';
+export const PATH_FREE_VERSION = '#';
 
 export const PATH_FIGMA_PREVIEW =
   'https://www.figma.com/file/rWMDOkMZYw2VpTdNuBBCvN/%5BPreview%5D-Minimal-Web.26.11.22?node-id=0%3A1&t=ya2mDFiuhTXXLLF1-1';

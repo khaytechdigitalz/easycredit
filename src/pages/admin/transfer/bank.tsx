@@ -60,7 +60,7 @@ import Label from '../../../components/label';
 
 import { 
   BookingWidgetSummary, 
-} from '../../../sections/@dashboard/transfer/stat';
+} from '../../../sections/@dashboard/loans/stat';
 // assets
 import {
   BookingIllustration, 
@@ -530,7 +530,8 @@ export default function TransferPage() {
         <Grid container spacing={3}>
 
             <Grid item xs={12} md={12}>
-              <BookingWidgetSummary image="/assets/icons/payments/bank.png" title="Total Transfers" total={responselog?.data ? responselog.data.total : '0'} icon={<BookingIllustration />} />
+
+              <BookingWidgetSummary image="/assets/icons/loan/FundsTransfer.png" title="Total Transfers" total={responselog?.data ? responselog.data.total : '0'} icon={<BookingIllustration />} />
             </Grid>
  
         </Grid>

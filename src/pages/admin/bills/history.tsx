@@ -62,9 +62,9 @@ import { fDateTime } from '../../../utils/formatTime';
 import { fCurrency } from '../../../utils/formatNumber';
 import Label from '../../../components/label';
 
-import {
-  BookingWidgetSummary,
-} from '../../../sections/@dashboard/bills/stat';
+import { 
+  BookingWidgetSummary, 
+} from '../../../sections/@dashboard/loans/stat';
 // assets
 import {
   BookingIllustration,
@@ -391,7 +391,7 @@ export default function BillsPage() {
           to: formattedTo,
         }).toString();
 
-        url = `/admin/bill/search?${queryParams}`;
+        url = `/admin/bill/history?${queryParams}`;
         enqueueSnackbar('Applying filter...', { variant: 'info' });
 
       } else {
@@ -638,7 +638,7 @@ export default function BillsPage() {
         <Grid container spacing={3}>
 
             <Grid item xs={12} md={12}>
-              <BookingWidgetSummary image="/assets/icons/payments/cart.png" title="Total Bills Payment" total={responselog?.data ? responselog.data.total : '0'} icon={<BookingIllustration />} />
+              <BookingWidgetSummary image="/assets/icons/loan/BillPayment.png" title="Total Bills Payment" total={responselog?.data ? responselog.data.total : '0'} icon={<BookingIllustration />} />
             </Grid>
  
         </Grid>

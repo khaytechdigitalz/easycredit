@@ -73,19 +73,19 @@ export default function GeneralAppPage() {
           </Grid>
           
           <Grid item xs={12} md={3}>
-              <BookingWidgetSummary image="/assets/icons/payments/5.png" title="Loan Disbursed" total={dashstat?.loanDisbursed || 0} icon={<BookingIllustration />} />
+              <BookingWidgetSummary image="/assets/icons/loan/LoanDisbursed.png" title="Loan Disbursed" total={dashstat?.loanDisbursed || 0} icon={<BookingIllustration />} />
             </Grid>
 
             <Grid item xs={12} md={3}>
-              <BookingWidgetSummary image="/assets/icons/payments/4.png" title="Total Repayment" total={dashstat?.totalRepayment || 0}  icon={<BookingIllustration />} />
+              <BookingWidgetSummary image="/assets/icons/loan/TotalRepayment.png" title="Total Repayment" total={dashstat?.totalRepayment || 0}  icon={<BookingIllustration />} />
             </Grid>
 
             <Grid item xs={12} md={3}>
-              <BookingWidgetSummary image="/assets/icons/payments/7.png" title="Total Outstanding" total={dashstat?.totalOutstanding || 0} icon={<BookingIllustration />} />
+              <BookingWidgetSummary image="/assets/icons/loan/TotalOutstanding.png" title="Total Outstanding" total={dashstat?.totalOutstanding || 0} icon={<BookingIllustration />} />
             </Grid>
 
             <Grid item xs={12} md={3}>
-              <BookingWidgetSummary image="/assets/icons/payments/1.png" title="Total Arrears" total={dashstat?.totalArrears || 0}  icon={<BookingIllustration />} />
+              <BookingWidgetSummary image="/assets/icons/loan/TotalArrears.png" title="Total Arrears" total={dashstat?.totalArrears || 0}  icon={<BookingIllustration />} />
             </Grid>
 
            

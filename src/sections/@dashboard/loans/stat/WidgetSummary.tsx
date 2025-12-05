@@ -33,23 +33,29 @@ export default function BookingWidgetSummary({ title, total, image, sx, ...other
           {title}
         </Typography>
       </div>
-
-      <Box
-        sx={{
-          width: 120,
-          height: 120,
-          lineHeight: 0,
-          borderRadius: '50%',
-          bgcolor: 'background.neutral',
-        }}
-      >
-        <Image
-                alt="icon"
-                src={image}
-                sx={{ mb: 1, maxWidth: 100 }}
-              />
-        
-      </Box>
+ 
+<Box
+  sx={{
+    width: 90,
+    height: 90,
+    lineHeight: 0,
+    borderRadius: '50%',
+    bgcolor: '#2596be',
+    // --- Add these properties for centering ---
+    display: 'flex',
+    justifyContent: 'center', // Centers horizontally
+    alignItems: 'center', // Centers vertically
+    // -----------------------------------------
+  }}
+>
+  <Image
+    alt="icon"
+    src={image}
+    // Remove maxWidth: 80 from here, or adjust it if the image is too large.
+    // If you need the max width, ensure it's less than the box width (100px).
+    sx={{ maxWidth: 60 }}
+  />
+</Box>
     </Card>
   );
 }
